@@ -1,0 +1,16 @@
+{
+  "name": "blood-level-zero",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Blood Level Zero — a first-person, System-driven vampire sandbox. Twee/SugarCube source compiled to a standalone playable HTML build via a small custom interpreter.",
+  "scripts": {
+    "build": "node tools/build.js",
+    "validate": "node tools/validate_links.js",
+    "coverage": "node tools/coverage_check.js",
+    "playthroughs": "node tools/test_harness.js",
+    "smoke": "node tools/smoke_test.js",
+    "test": "npm run validate && npm run coverage && npm run playthroughs",
+    "dev": "npm run build && npx --yes serve -l 4173 ."
+  },
+  "license": "UNLICENSED"
+}

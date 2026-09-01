@@ -1,0 +1,614 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blood Level Zero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0a0908;
+    --panel:#141210;
+    --panel-2:#1b1815;
+    --rule:#332723;
+    --blood-deep:#5c141f;
+    --blood:#9c2233;
+    --blood-bright:#c93a4c;
+    --system:#8fa39c;
+    --system-dim:#5d6d68;
+    --bone:#ddd3c4;
+    --bone-dim:#9a9086;
+    --muted:#6b6259;
+    --warn:#c9963a;
+    font-size:16px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--void);
+    color:var(--bone);
+    font-family:'Spectral',Georgia,'Times New Roman',serif;
+    font-size:1.05rem;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    position:relative;
+    overflow-x:hidden;
+  }
+
+  @keyframes grain-shift{
+    0%,100%{ transform:translate(0,0); }
+    20%{ transform:translate(-2%,-3%); }
+    40%{ transform:translate(-4%,2%); }
+    60%{ transform:translate(2%,-2%); }
+    80%{ transform:translate(3%,3%); }
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:-10%;
+    pointer-events:none;
+    z-index:1;
+    opacity:.05;
+    mix-blend-mode:overlay;
+    background-image:
+      radial-gradient(circle at 20% 30%, #fff 0, transparent 40%),
+      radial-gradient(circle at 80% 10%, #fff 0, transparent 35%),
+      radial-gradient(circle at 60% 80%, #fff 0, transparent 45%),
+      radial-gradient(circle at 10% 90%, #fff 0, transparent 30%);
+    background-size:180% 180%;
+    animation:grain-shift 9s steps(8) infinite;
+  }
+  @media (prefers-reduced-motion:reduce){
+    body::before{ animation:none; }
+  }
+
+  #app{
+    position:relative; z-index:2;
+    max-width:680px;
+    margin:0 auto;
+    padding:0 22px 96px;
+  }
+
+  /* ---- Masthead ---- */
+  .masthead{
+    padding:26px 0 14px;
+    border-bottom:1px solid var(--rule);
+    margin-bottom:0;
+  }
+  .wordmark{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.72rem;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--system);
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .wordmark .title{ color:var(--bone-dim); }
+  .wordmark .dot{ color:var(--blood-bright); }
+  .restart-link{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.68rem;
+    letter-spacing:.1em;
+    color:var(--muted);
+    text-decoration:none;
+    text-transform:uppercase;
+    border:1px solid var(--rule);
+    padding:3px 8px;
+    cursor:pointer;
+    background:transparent;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .restart-link:hover{ color:var(--blood-bright); border-color:var(--blood-deep); }
+  .restart-link:focus-visible{ outline:2px solid var(--system); outline-offset:2px; }
+
+  /* ---- Status strip ---- */
+  .status{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+    padding:14px 0 18px;
+    border-bottom:1px solid var(--rule);
+    margin-bottom:22px;
+  }
+  .gauge{ display:flex; flex-direction:column; gap:5px; }
+  .gauge-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.62rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--muted);
+    display:flex;
+    justify-content:space-between;
+  }
+  .gauge-label .val{
+    color:var(--bone-dim);
+    font-variant-numeric:tabular-nums;
+  }
+  .ticks{
+    display:flex;
+    gap:2px;
+    height:8px;
+  }
+  .ticks span{
+    flex:1 1 0;
+    background:var(--panel-2);
+    border-top:1px solid var(--rule);
+  }
+  .ticks span.on{ background:var(--fill,var(--system)); border-top-color:var(--fill,var(--system)); }
+  .gauge.hunger .ticks span.on{ --fill:var(--warn); }
+  .gauge.humanity .ticks span.on{ --fill:var(--system); }
+  .gauge.heat .ticks span.on{ --fill:var(--blood-bright); }
+  .gauge.critical .gauge-label .val{ color:var(--blood-bright); }
+
+  .disciplines-row{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.66rem;
+    letter-spacing:.08em;
+    color:var(--system-dim);
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin:-6px 0 22px;
+    min-height:1em;
+  }
+  .disciplines-row .tag{
+    border:1px solid var(--rule);
+    padding:2px 7px;
+    color:var(--system);
+    text-transform:uppercase;
+  }
+
+  /* ---- Passage text ---- */
+  #passage{ min-height:40vh; }
+  #passage p{
+    margin:0 0 1.15em;
+    color:var(--bone);
+  }
+  #passage p:first-of-type::first-letter{
+    color:var(--blood-bright);
+  }
+  #passage strong{ color:var(--bone); font-weight:600; }
+  #passage em{ color:var(--bone-dim); }
+
+  .sys-pulse{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.82rem;
+    line-height:1.6;
+    color:var(--system);
+    background:var(--panel);
+    border:1px solid var(--rule);
+    border-left:3px solid var(--blood);
+    padding:12px 14px;
+    margin:20px 0;
+    letter-spacing:.01em;
+    animation:pulse-in .35s ease both;
+  }
+  .sys-pulse strong{ color:var(--blood-bright); font-weight:700; }
+  @keyframes pulse-in{
+    from{ opacity:0; transform:translateY(-4px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  @media (prefers-reduced-motion:reduce){
+    .sys-pulse{ animation:none; }
+  }
+
+  /* ---- Choices ---- */
+  #choices{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-top:26px;
+  }
+  .choice-row{ display:contents; }
+  a.choice-link{
+    display:block;
+    font-family:'JetBrains Mono',monospace;
+    font-size:.86rem;
+    letter-spacing:.01em;
+    color:var(--bone);
+    text-decoration:none;
+    background:var(--panel);
+    border:1px solid var(--rule);
+    padding:11px 14px;
+    transition:border-color .15s ease, background .15s ease, color .15s ease, padding-left .15s ease;
+  }
+  a.choice-link::before{
+    content:"›";
+    display:inline-block;
+    width:1.1em;
+    color:var(--blood);
+  }
+  a.choice-link:hover{
+    border-color:var(--blood-deep);
+    background:var(--panel-2);
+    color:#fff;
+    padding-left:18px;
+  }
+  a.choice-link:hover::before{ color:var(--blood-bright); }
+  a.choice-link:focus-visible{ outline:2px solid var(--system); outline-offset:1px; }
+
+  footer.notice{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.62rem;
+    color:var(--muted);
+    letter-spacing:.04em;
+    margin-top:48px;
+    padding-top:16px;
+    border-top:1px solid var(--rule);
+  }
+
+  ::selection{ background:var(--blood-deep); color:#fff; }
+</style>
+
+<div id="app">
+  <div class="masthead">
+    <div class="wordmark">
+      <span class="title">Blood Level Zero<span class="dot">.</span></span>
+      <button class="restart-link" id="restartBtn" type="button">↺ begin again</button>
+    </div>
+  </div>
+
+  <div class="status" id="statusStrip" aria-hidden="true"></div>
+  <div class="disciplines-row" id="disciplinesRow"></div>
+
+  <main id="passage" aria-live="polite"></main>
+  <div id="choices"></div>
+
+  <footer class="notice">SYSTEM ONLINE — TRACKING ACTIVE — SIRE: UNKNOWN — a Twine work-in-progress, playable build</footer>
+</div>
+
+<script>
+/* ==== Blood Level Zero — embedded engine (SugarCube-subset interpreter) ==== */
+// Blood Level Zero — minimal SugarCube-subset Twee interpreter.
+// Supports: StoryData/StoryTitle/StoryInit, <<set>>, <<run>>, <<if>>/<<elseif>>/<<else>>/<</if>>,
+// <<print>>/<<=>>, <<include "Name">>, naked $var / $var.prop interpolation, [[Text->Target]] links,
+// ''bold'' markup, raw HTML passthrough.
+
+function BLZCreateEngine(tweeSource) {
+  const passages = parsePassages(tweeSource);
+  const state = {};
+  let currentPassage = null;
+
+  function parsePassages(src) {
+    const result = {};
+    // normalize line endings
+    src = src.replace(/\r\n/g, '\n');
+    const parts = src.split(/^:: /m).slice(1);
+    for (const part of parts) {
+      const nl = part.indexOf('\n');
+      const headerLine = nl === -1 ? part : part.slice(0, nl);
+      const body = nl === -1 ? '' : part.slice(nl + 1);
+      const m = headerLine.match(/^(.*?)\s*(?:\[(.*)\])?\s*$/);
+      const name = (m ? m[1] : headerLine).trim();
+      const tags = m && m[2] ? m[2].split(/\s+/).filter(Boolean) : [];
+      result[name] = { name, tags, body, ast: null };
+    }
+    return result;
+  }
+
+  function tokenize(body) {
+    const tokens = [];
+    const re = /<<(.*?)>>|\[\[(.*?)\]\]/gs;
+    let last = 0, m;
+    while ((m = re.exec(body))) {
+      if (m.index > last) tokens.push({ type: 'text', value: body.slice(last, m.index) });
+      if (m[1] !== undefined) {
+        const raw = m[1].trim();
+        const mm = raw.match(/^(\/?[A-Za-z=]+)\s*([\s\S]*)$/);
+        const kw = mm ? mm[1] : raw;
+        const arg = mm ? mm[2] : '';
+        tokens.push({ type: 'macro', kw, arg, raw });
+      } else {
+        tokens.push({ type: 'link', raw: m[2] });
+      }
+      last = re.lastIndex;
+    }
+    if (last < body.length) tokens.push({ type: 'text', value: body.slice(last) });
+    return tokens;
+  }
+
+  function parseBlock(tokens, pos) {
+    const nodes = [];
+    while (pos.i < tokens.length) {
+      const t = tokens[pos.i];
+      if (t.type === 'text') { nodes.push({ type: 'text', value: t.value }); pos.i++; continue; }
+      if (t.type === 'link') { nodes.push({ type: 'link', raw: t.raw }); pos.i++; continue; }
+      // macro
+      if (t.kw === 'if') {
+        pos.i++;
+        const branches = [{ cond: t.arg, body: parseBlock(tokens, pos) }];
+        while (tokens[pos.i] && tokens[pos.i].type === 'macro' && tokens[pos.i].kw === 'elseif') {
+          const cond = tokens[pos.i].arg; pos.i++;
+          branches.push({ cond, body: parseBlock(tokens, pos) });
+        }
+        let elseBody = null;
+        if (tokens[pos.i] && tokens[pos.i].type === 'macro' && tokens[pos.i].kw === 'else') {
+          pos.i++;
+          elseBody = parseBlock(tokens, pos);
+        }
+        if (tokens[pos.i] && tokens[pos.i].type === 'macro' && tokens[pos.i].kw === '/if') {
+          pos.i++;
+        } else {
+          throw new Error('Missing <</if>> closing tag near: ' + JSON.stringify(t));
+        }
+        nodes.push({ type: 'if', branches, elseBody });
+        continue;
+      }
+      if (t.kw === 'elseif' || t.kw === 'else' || t.kw === '/if') {
+        return nodes; // let caller consume the closer
+      }
+      if (t.kw === 'set') { nodes.push({ type: 'set', arg: t.arg }); pos.i++; continue; }
+      if (t.kw === 'run') { nodes.push({ type: 'run', arg: t.arg }); pos.i++; continue; }
+      if (t.kw === 'print' || t.kw === '=') { nodes.push({ type: 'print', arg: t.arg }); pos.i++; continue; }
+      if (t.kw === 'include') { nodes.push({ type: 'include', arg: t.arg }); pos.i++; continue; }
+      // unknown macro: ignore silently
+      pos.i++;
+    }
+    return nodes;
+  }
+
+  function ensureAst(p) {
+    if (!p.ast) {
+      const toks = tokenize(p.body);
+      p.ast = parseBlock(toks, { i: 0 });
+    }
+    return p.ast;
+  }
+
+  function subst(expr) {
+    return expr
+      .replace(/\$([A-Za-z_][A-Za-z0-9_]*)/g, 'state.$1')
+      .replace(/(^|[^A-Za-z0-9_$.])_([A-Za-z_][A-Za-z0-9_]*)/g, (m, pre, id) => pre + 'temp.' + id);
+  }
+
+  function evalExpr(expr) {
+    const code = subst(expr);
+    try {
+      // eslint-disable-next-line no-new-func
+      const fn = new Function('state', 'temp', 'Math', 'return (' + code + ')');
+      return fn(state, {}, Math);
+    } catch (e) {
+      throw new Error('Expression error in "' + expr + '" (compiled: ' + code + '): ' + e.message);
+    }
+  }
+
+  function execStmt(arg, isSet) {
+    if (isSet) {
+      const m = arg.match(/^\$([A-Za-z_][A-Za-z0-9_]*)\s+to\s+([\s\S]+)$/);
+      if (!m) throw new Error('Malformed <<set>>: ' + arg);
+      const varName = m[1];
+      const value = evalExpr(m[2]);
+      state[varName] = value;
+    } else {
+      const code = subst(arg);
+      try {
+        // eslint-disable-next-line no-new-func
+        const fn = new Function('state', 'temp', 'Math', code);
+        fn(state, {}, Math);
+      } catch (e) {
+        throw new Error('Statement error in "' + arg + '" (compiled: ' + code + '): ' + e.message);
+      }
+    }
+  }
+
+  function interpolateText(text) {
+    // naked $var / $var.prop.prop interpolation (no calls/brackets)
+    let out = text.replace(/\$([A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*)/g, (m, path) => {
+      try {
+        const val = evalExpr('$' + path);
+        return val === undefined ? '' : String(val);
+      } catch (e) {
+        return m;
+      }
+    });
+    // ''bold'' markup -> <strong>
+    out = out.replace(/''(.+?)''/g, '<strong>$1</strong>');
+    return out;
+  }
+
+  function renderLink(raw) {
+    let text, target;
+    if (raw.includes('->')) {
+      const idx = raw.indexOf('->');
+      text = raw.slice(0, idx).trim();
+      target = raw.slice(idx + 2).trim();
+    } else if (raw.includes('<-')) {
+      const idx = raw.indexOf('<-');
+      target = raw.slice(0, idx).trim();
+      text = raw.slice(idx + 2).trim();
+    } else {
+      text = raw.trim();
+      target = raw.trim();
+    }
+    return '<a href="#" class="choice-link" data-target="' + target.replace(/"/g, '&quot;') + '">' + text + '</a>';
+  }
+
+  function render(nodes) {
+    let out = '';
+    for (const n of nodes) {
+      if (n.type === 'text') {
+        out += interpolateText(n.value);
+      } else if (n.type === 'link') {
+        out += renderLink(n.raw);
+      } else if (n.type === 'if') {
+        let done = false;
+        for (const br of n.branches) {
+          if (!done && evalExpr(br.cond)) { out += render(br.body); done = true; }
+        }
+        if (!done && n.elseBody) out += render(n.elseBody);
+      } else if (n.type === 'set') {
+        execStmt(n.arg, true);
+      } else if (n.type === 'run') {
+        execStmt(n.arg, false);
+      } else if (n.type === 'print') {
+        out += String(evalExpr(n.arg));
+      } else if (n.type === 'include') {
+        const name = n.arg.trim().replace(/^"|"$/g, '');
+        const p = passages[name];
+        if (p) { ensureAst(p); out += render(p.ast); }
+      }
+    }
+    return out;
+  }
+
+  function formatOutput(html) {
+    const lines = html.split('\n');
+    let out = '';
+    let paraBuf = [];
+    function flushPara() {
+      if (paraBuf.length) {
+        out += '<p>' + paraBuf.join(' ') + '</p>';
+        paraBuf = [];
+      }
+    }
+    for (const raw of lines) {
+      const line = raw.trim();
+      if (line === '') { flushPara(); continue; }
+      if (/^<div/.test(line)) { flushPara(); out += line; continue; }
+      if (/^(<a href="#" class="choice-link"[^>]*>.*?<\/a>\s*)+$/.test(line)) {
+        // Choice links are surfaced separately via getChoices()/result.choices —
+        // the caller renders them as interactive buttons, so omit them from the
+        // narrative HTML to avoid a second, non-interactive copy.
+        flushPara();
+        continue;
+      }
+      paraBuf.push(line);
+    }
+    flushPara();
+    return out;
+  }
+
+  function getChoices(html) {
+    const choices = [];
+    const re = /<a href="#" class="choice-link" data-target="([^"]*)">(.*?)<\/a>/g;
+    let m;
+    while ((m = re.exec(html))) {
+      choices.push({ target: m[1].replace(/&quot;/g, '"'), text: m[2] });
+    }
+    return choices;
+  }
+
+  // --- init ---
+  if (passages['StoryInit']) {
+    ensureAst(passages['StoryInit']);
+    render(passages['StoryInit'].ast); // executes <<set>> side effects, discards text output
+  }
+
+  let startPassage = 'Awakening';
+  if (passages['StoryData']) {
+    try { startPassage = JSON.parse(passages['StoryData'].body).start || startPassage; } catch (e) { /* ignore */ }
+  }
+
+  return {
+    passageNames: Object.keys(passages).filter(n => !['StoryData', 'StoryTitle', 'Styles', 'StoryInit', 'SystemCheck'].includes(n)),
+    startPassage,
+    state,
+    goto(name) {
+      const p = passages[name];
+      if (!p) throw new Error('Unknown passage: ' + name);
+      currentPassage = name;
+      ensureAst(p);
+      const raw = render(p.ast);
+      const formatted = formatOutput(raw);
+      return { html: formatted, choices: getChoices(raw), passage: name };
+    },
+    current() { return currentPassage; }
+  };
+}
+
+if (typeof module !== 'undefined') module.exports = { BLZCreateEngine };
+
+
+/* ==== Story source (identical to blood_level_zero.twee) ==== */
+const TWEE_SOURCE = ":: StoryData\n{\n  \"ifid\": \"AC5FB15F-7DE0-4294-AE21-DC1499CD5FF6\",\n  \"format\": \"SugarCube\",\n  \"format-version\": \"2.37.3\",\n  \"start\": \"Awakening\",\n  \"tag-colors\": {\n    \"StoryInit\": \"gray\",\n    \"stylesheet\": \"gray\"\n  },\n  \"zoom\": 0.25\n}\n\n:: StoryTitle\nBlood Level Zero\n\n:: Styles [stylesheet]\nbody { background: #0b0a0d; color: #d8d0d2; font-family: Georgia, 'Times New Roman', serif; }\n#story { max-width: 720px; margin: 0 auto; }\n.sys-pulse { border: 1px solid #7a1f2b; background: rgba(122,31,43,0.12); color: #e7c8cc;\n  padding: 10px 14px; margin: 14px 0; font-family: 'Courier New', monospace; font-size: 0.9em;\n  letter-spacing: 0.02em; }\n.sys-pulse strong { color: #ff4d5e; }\na.link-internal, a.macro-link { color: #c94b5a; }\na.link-internal:hover, a.macro-link:hover { color: #ff8a95; }\nhr { border-color: #3a1418; }\n\n:: StoryInit\n<<set $hunger to 78>>\n<<set $humanity to 82>>\n<<set $heat to 6>>\n<<set $disciplines to []>>\n<<set $carefulStreak to 0>>\n<<set $recklessCount to 0>>\n<<set $kestrelStanding to 0>>\n<<set $miraTrust to 0>>\n<<set $okaforAwareness to 0>>\n<<set $feedsCareful to 0>>\n<<set $feedsReckless to 0>>\n<<set $turn to 0>>\n<<set $visitedMidtown to false>>\n<<set $visitedDocks to false>>\n<<set $visitedHollow to false>>\n<<set $metMira to false>>\n<<set $metKestrel to false>>\n<<set $hollowResolved to false>>\n<<set $warnHunger to false>>\n<<set $warnHeat to false>>\n<<set $warnHumanity to false>>\n<<set $tutorialDone to false>>\n\n:: SystemCheck\n<<if $hunger >= 85 && !$warnHunger>>\n<<set $warnHunger to true>>\n<div class=\"sys-pulse\"><strong>[ SYSTEM ]</strong> Hunger critical.<br>Control is a resource. You are spending it fast.</div>\n<</if>>\n<<if $hunger < 60 && $warnHunger>>\n<<set $warnHunger to false>>\n<</if>>\n<<if $heat >= 60 && !$warnHeat>>\n<<set $warnHeat to true>>\n<div class=\"sys-pulse\"><strong>[ SYSTEM ]</strong> Notoriety rising.<br>Something in this city has started paying attention to you.</div>\n<</if>>\n<<if $heat < 40 && $warnHeat>>\n<<set $warnHeat to false>>\n<</if>>\n<<if $humanity <= 40 && !$warnHumanity>>\n<<set $warnHumanity to true>>\n<div class=\"sys-pulse\"><strong>[ SYSTEM ]</strong> Humanity anchor weakening.<br>The distance between you and what you used to be is growing.</div>\n<</if>>\n<<if $humanity > 55 && $warnHumanity>>\n<<set $warnHumanity to false>>\n<</if>>\n<<if $carefulStreak >= 3 && !$disciplines.includes(\"Obfuscate\")>>\n<<run $disciplines.push(\"Obfuscate\")>>\n<div class=\"sys-pulse\"><strong>[ SYSTEM ]</strong> Discipline Unlocked: <strong>Obfuscate</strong><br>Three careful kills, three clean exits. You've learned to fold yourself into shadow and static memory. Future feedings and escapes run quieter.</div>\n<</if>>\n<<if $recklessCount >= 2 && !$disciplines.includes(\"Potence\")>>\n<<run $disciplines.push(\"Potence\")>>\n<div class=\"sys-pulse\"><strong>[ SYSTEM ]</strong> Discipline Unlocked: <strong>Potence</strong><br>Violence has taught your body something. Your strength has a new, colder edge to it.</div>\n<</if>>\n<<if $kestrelStanding >= 4 && !$disciplines.includes(\"Auspex\")>>\n<<run $disciplines.push(\"Auspex\")>>\n<div class=\"sys-pulse\"><strong>[ SYSTEM ]</strong> Discipline Unlocked: <strong>Auspex</strong><br>Kestrel's lessons have opened something behind your eyes. You start to sense what's coming before it arrives.</div>\n<</if>>\n\n:: Awakening\nThe last thing you remember is cold concrete and a taste like a struck match.\n\nNow you're on your back in an alley that smells of rain and motor oil, staring up at a sky with no stars in it, just the orange smear of the city ceiling. Your chest doesn't rise. You check, twice, out of habit. It doesn't rise the third time either.\n\nSomething under your ribs turns over, slow and enormous, like a second heartbeat learning how to want.\n\nText scrawls into being at the bottom of your vision, unbidden, uninvited, precise.\n\n<div class=\"sys-pulse\"><strong>[ SYSTEM ]</strong> Vessel status: <strong>ACTIVE</strong>.<br>Subject reclassified. Sire: <strong>UNKNOWN</strong>. Coven: <strong>NONE</strong>.<br>Hunger tracking initialized.</div>\n\n[[You sit up.->FirstPulse]]\n\n:: FirstPulse\nYou get your feet under you against a dumpster that gives a little too easily, like your grip is stronger than you remember it being. The hunger sharpens the second you're vertical, a wire pulled tight behind your teeth.\n\n<div class=\"sys-pulse\"><strong>[ SYSTEM ]</strong> Hunger: <strong>$hunger</strong>/100 — Humanity: <strong>$humanity</strong>/100 — Notoriety: <strong>$heat</strong>/100<br>No Disciplines known. No territory claimed. No allies.</div>\n\nNo sire. No coven. No idea what you are beyond the word that keeps surfacing in your skull like a bruise: <em>vampire</em>. Just a body that doesn't need to breathe, a hunger that won't quit, and this — thing — quietly narrating your descent.\n\nDown the alley mouth, the street glows sodium-orange. You can hear a heartbeat from here. Actually — you can hear several. Threaded through traffic noise and a distant train, each one is suddenly, obscenely distinct, like the city just handed you a stethoscope pressed to its whole chest.\n\nOne of them is close. Twenty feet, behind a stack of pallets, sitting down, breathing wet and slow. Drunk, maybe. Alone.\n\n[[Follow the sound.->TutorialAlley]]\n\n:: TutorialAlley\nHe's maybe forty, suit jacket balled under his head as a pillow, an empty bottle standing sentinel by his shoe. He smells like whiskey and, underneath it, like something your new body has already decided is the only thing that matters in the world.\n\nThe hunger doesn't ask permission. It just tells you, very clearly, what would happen if you knelt down and put your mouth against his throat.\n\nYou have a choice in how you do this. You can already sense that much.\n\n<<if $tutorialDone>>\n[[Feed carefully, take only what you need.->TutorialFeedCareful]]\n[[Feed hard and fast, take what you want.->TutorialFeedReckless]]\n<<else>>\n[[Feed carefully — slow, controlled, leave him breathing.->TutorialFeedCareful]]\n[[Feed hard and fast — let the hunger drive.->TutorialFeedReckless]]\n[[Fight it. Walk away.->TutorialResist]]\n<</if>>\n\n:: TutorialFeedCareful\n<<set $hunger to Math.max(0, $hunger - 25)>>\n<<set $humanity to Math.min(100, $humanity + 2)>>\n<<set $heat to $heat + 2>>\n<<set $carefulStreak to $carefulStreak + 1>>\n<<set $recklessCount to 0>>\n<<set $feedsCareful to $feedsCareful + 1>>\n<<set $tutorialDone to true>>\nYou kneel, tilt his head aside like you've done it a thousand times, and drink in slow, measured pulls. You stop while his heart is still finding its rhythm again, not stuttering. You wipe your mouth. He'll wake up hungover and unnerved, with two small marks he'll blame on a bug bite, and no memory of you at all.\n\nThe hunger recedes to a dull, manageable ache instead of a scream. That matters. You can think again.\n\n<<include \"SystemCheck\">>\n\n[[Stand up. Look at the city properly for the first time.->TheCityHub]]\n\n:: TutorialFeedReckless\n<<set $hunger to Math.max(0, $hunger - 45)>>\n<<set $humanity to Math.max(0, $humanity - 8)>>\n<<set $heat to $heat + 15>>\n<<set $recklessCount to $recklessCount + 1>>\n<<set $carefulStreak to 0>>\n<<set $feedsReckless to $feedsReckless + 1>>\n<<set $tutorialDone to true>>\nYou don't kneel. You fall on him, and something in you that isn't hungry so much as furious takes over for a while. When you come back to yourself his lips are gray and his heartbeat is a thready, terrified flutter against your ear, and you have to force yourself — physically force your own jaw — to stop.\n\nHe lives. Barely. He'll remember a shape, a weight, eyes that weren't right. He'll tell someone. Someone will listen.\n\nThe hunger goes quiet all at once, gorged and satisfied, and the silence of it is almost worse than the noise was.\n\n<<include \"SystemCheck\">>\n\n[[Stand up. Look at the city properly for the first time.->TheCityHub]]\n\n:: TutorialResist\nYou dig your nails into your own palms and make yourself stand, make yourself walk the other way, out toward the street. Whatever you are, you decide, it isn't going to be decided for you on the first night.\n\n<<set $hunger to Math.min(100, $hunger + 8)>>\n<<set $humanity to Math.min(100, $humanity + 1)>>\nIt costs you. The hunger doesn't forgive resistance, it just files it away and gets louder. Your hands are shaking by the time you reach the sidewalk, and the heartbeat behind you in the alley suddenly sounds less like temptation and more like a countdown.\n\n<<if $hunger >= 90>>\n[[The countdown runs out.->FrenzyTutorial]]\n<<else>>\n[[Push forward into the city anyway.->TheCityHub]]\n<</if>>\n\n:: FrenzyTutorial\n<<set $hunger to 15>>\n<<set $humanity to Math.max(0, $humanity - 15)>>\n<<set $heat to $heat + 20>>\n<<set $recklessCount to $recklessCount + 1>>\n<<set $tutorialDone to true>>\nThe next clear thought you have, you're crouched over the man from the alley and he is not moving and there is a sound coming from you that you don't recognize as anything you've ever made before.\n\nYou don't remember crossing the distance. That's the worst part. There's a gap in you now where a choice should have been.\n\n<div class=\"sys-pulse\"><strong>[ SYSTEM ]</strong> Frenzy state resolved.<br>Control was not available. The System does not judge. The System only records.</div>\n\nYou leave him where he fell — breathing, you make yourself check, breathing — and walk into the city with blood on your collar and no memory of the ten minutes that just happened to you instead of because of you.\n\n<<include \"SystemCheck\">>\n\n[[Keep walking.->TheCityHub]]\n\n:: TheCityHub\n<<set $turn to $turn + 1>>\n<<if $hunger >= 92>>\nThe hunger has stopped being a feeling and started being the only thing that exists. Your vision has a red rim to it. You are not going to make a good decision about this on your own.\n\n[[Something takes over.->FrenzyEvent]]\n<<elseif $heat >= 90>>\nYou've been made. You feel it before you see them — the wrongness of a car idling too long, a jacket that doesn't fit the weather. Someone has been building a file on you, and tonight they close it.\n\n[[They close in.->HunterAmbush]]\n<<else>>\nThe city goes on not caring about you, which after tonight feels like a small mercy. Streetlight, wet asphalt, a thousand heartbeats you're learning to filter out on purpose so you don't have to hear all of them at once.\n\n<div class=\"sys-pulse\"><strong>[ SYSTEM ]</strong> Hunger: <strong>$hunger</strong>/100 &nbsp;|&nbsp; Humanity: <strong>$humanity</strong>/100 &nbsp;|&nbsp; Notoriety: <strong>$heat</strong>/100</div>\n\nThree parts of the city keep pulling at your attention, each for a different reason.\n\n[[Head into Midtown Lights — bars, crowds, easy witnesses.->MidtownEntry]]\n[[Head down to The Docks — rougher, contested, and something's watching there too.->DocksEntry]]\n[[Head toward Ashgrove Hollow — the old cemetery quarter. Claimed ground.->HollowEntry]]\n[[Find somewhere quiet to wait out the hours.->Rest]]\n[[Check what you've become so far.->CheckStatus]]\n<<if $turn >= 3>>\n[[Stop here for tonight and take stock.->NightReflection]]\n<</if>>\n<</if>>\n\n:: CheckStatus\n<div class=\"sys-pulse\">\n<strong>[ SYSTEM — STATUS ]</strong><br>\nHunger: <strong>$hunger</strong>/100<br>\nHumanity: <strong>$humanity</strong>/100<br>\nNotoriety: <strong>$heat</strong>/100\n</div>\n\n<<if $disciplines.length > 0>>\n''Disciplines known:''\n<<if $disciplines.includes(\"Obfuscate\")>>\n- <strong>Obfuscate</strong> — fold into shadow and static memory; quieter feeding, cleaner exits.\n<</if>>\n<<if $disciplines.includes(\"Potence\")>>\n- <strong>Potence</strong> — inhuman strength, bought with violence.\n<</if>>\n<<if $disciplines.includes(\"Auspex\")>>\n- <strong>Auspex</strong> — heightened senses; you feel danger coming before it arrives.\n<</if>>\n<<else>>\nNo Disciplines have surfaced yet. Whatever you become, it hasn't shown itself.\n<</if>>\n\n''Territory:''\n- Midtown Lights — unclaimed, populated, forgiving. <<if $visitedMidtown>>You know it now.<<else>>Unvisited.<</if>>\n- The Docks — contested ground, rough prey, hunter rumors. <<if $visitedDocks>>You know it now.<<else>>Unvisited.<</if>>\n- Ashgrove Hollow — claimed by something older than you. <<if $visitedHollow>>You've trespassed there.<<else>>Unvisited.<</if>>\n\n''People:''\n<<if $metMira>>- Mira, bartender, Midtown. Trust: $miraTrust<<else>>- No one in Midtown knows your name yet.<</if>>\n<<if $metKestrel>>- Kestrel, a Kindred loner, the Docks. Standing: $kestrelStanding<<else>>- No Kindred have found you yet — or admitted it.<</if>>\n\n[[Back to the street.->TheCityHub]]\n\n:: Rest\n<<set $hunger to Math.min(100, $hunger + 10)>>\n<<set $humanity to Math.min(100, $humanity + 1)>>\n<<set $heat to Math.max(0, $heat - 5)>>\nYou find a gap between a boarded storefront and a fire escape and let the hours run out without you in them. Time passes strangely now — not sleep, exactly, more like a held breath that lasts until the sky starts thinking about dawn.\n\nLying low costs you nothing but a little more hunger and a little more patience. Nobody adds your description to a report tonight.\n\n<<include \"SystemCheck\">>\n\n[[Back to the street.->TheCityHub]]\n\n:: MidtownEntry\n<<set $visitedMidtown to true>>\n<<set $hunger to Math.min(100, $hunger + 3)>>\nMidtown Lights is doing what it always does at this hour: bleeding neon onto wet pavement, feeding music out of open bar doors, filling its sidewalks with people who are drunk enough not to notice a stranger's too-quiet footsteps. Easy hunting. Easy witnesses too, if you're careless.\n\n[[There's a bar on the corner with its lights still on — Mira's.->MidtownBar]]\n[[Walk the alleys behind the bars instead — quieter prey.->MidtownAlleyHunt]]\n<<if $heat >= 30>>\n[[Someone on the corner is talking too loud about something they saw.->MidtownWitnessEvent]]\n<</if>>\n[[Head back to the hub.->TheCityHub]]\n\n:: MidtownBar\n<<if $metMira>>\nMira's behind the bar again, rag in hand, radio low. She looks up when the door chimes and — for a second — she doesn't look afraid, which after everything you've done is its own strange gift.\n\n[[Sit down and talk to her.->MiraTalk]]\n<<if $miraTrust <= -3>>\n[[She's alone later. The hunger notices.->MiraFirstMeet]]\n<<else>>\n[[She mentioned closing up alone tonight. The hunger notices.->MiraFirstMeet]]\n<</if>>\n[[Leave the bar.->MidtownEntry]]\n<<else>>\n<<set $metMira to true>>\nThe bar is nearly empty — a couple of regulars fossilized on their stools, a radio playing something slow. The woman behind the counter is maybe thirty, tired around the eyes in a way that says double shift, wiping the same six inches of counter over and over. Her name tag says MIRA.\n\nShe catches you staring and, instead of looking away, gives you a small, exhausted smile. \"Rough night?\"\n\nYou have no idea how to answer that honestly.\n\n[[Sit down and talk to her.->MiraTalk]]\n[[Say nothing. Wait for her to be alone. The hunger is patient tonight.->MiraFirstMeet]]\n[[Leave the bar.->MidtownEntry]]\n<</if>>\n\n:: MiraTalk\n<<set $miraTrust to $miraTrust + 2>>\n<<set $humanity to Math.min(100, $humanity + 1)>>\nYou order something you have no intention of drinking and let her talk — about the regulars, about the landlord, about a sister in Ohio she hasn't called back. It costs you nothing but time, and it does something you don't expect: it makes you feel, for the length of the conversation, like a person having a conversation, instead of a hunger wearing one.\n\nShe doesn't know what you are. She just knows you listen. That's rarer than she thinks.\n\n<<include \"SystemCheck\">>\n\n[[Stay a while longer.->MidtownBar]]\n[[Head back to the hub.->TheCityHub]]\n\n:: MiraFirstMeet\nClosing time comes, the regulars stagger out, and Mira locks the door behind the last of them, alone now, counting the register down under a buzzing light. You could be inside before she even registers the sound of the lock failing to catch.\n\nThe hunger wants this one badly — you've been near her long enough that she smells like something closer to comfort than prey, which is its own kind of warning.\n\n<<if $miraTrust >= 3>>\nThere's a version of this where you never do this to her at all.\n[[Feed carefully — she wakes up tired and a little dizzy, nothing more.->MiraFeedCareful]]\n[[Feed hard — you need this more than you need her trust.->MiraFeedReckless]]\n[[Walk away. Not her. Not tonight.->MiraDeclineFeed]]\n<<else>>\n[[Feed carefully — controlled, quiet, she won't remember details.->MiraFeedCareful]]\n[[Feed hard and fast — the hunger's louder than your restraint tonight.->MiraFeedReckless]]\n[[Walk away.->MiraDeclineFeed]]\n<</if>>\n\n:: MiraFeedCareful\n<<set $hunger to Math.max(0, $hunger - 28)>>\n<<set $humanity to Math.min(100, $humanity + 1)>>\n<<set $heat to $heat + 2>>\n<<set $carefulStreak to $carefulStreak + 1>>\n<<set $recklessCount to 0>>\n<<set $miraTrust to $miraTrust + 3>>\n<<set $feedsCareful to $feedsCareful + 1>>\nYou're behind her before the register drawer closes, one hand steadying her shoulder, gentle enough that it could almost be mistaken for a touch a friend would give. You take slow, careful pulls and let her down into her chair before her knees do it for her.\n\nShe'll wake up in twenty minutes, disoriented, blaming low blood sugar and a double shift, and lock up like always. Some part of her — you can't explain how you know this — will keep half-trusting the quiet stranger who tips well and listens. That matters more than it should.\n\n<<include \"SystemCheck\">>\n\n[[Slip out into the night.->TheCityHub]]\n\n:: MiraFeedReckless\n<<set $hunger to Math.max(0, $hunger - 48)>>\n<<set $humanity to Math.max(0, $humanity - 10)>>\n<<set $heat to $heat + 18>>\n<<set $recklessCount to $recklessCount + 1>>\n<<set $carefulStreak to 0>>\n<<set $miraTrust to $miraTrust - 6>>\n<<set $feedsReckless to $feedsReckless + 1>>\nYou don't ease into it. She makes one short, cut-off sound before you have her, and by the time the hunger loosens its grip enough to let you think again, she's on the floor behind the bar, breathing but barely, and there's a spray of red across the till she'll have to explain to someone.\n\nShe survives. She will also never again feel safe in a room with a quiet stranger who tips well, and somewhere under the roar of your own satisfaction, you understand exactly what you just spent to fill this hunger up.\n\n<div class=\"sys-pulse\"><strong>[ SYSTEM ]</strong> A name has entered someone's memory as a threat.<br>Reputation accrues even when no one knows your face.</div>\n\n<<include \"SystemCheck\">>\n\n[[Get out before someone comes looking for the noise.->TheCityHub]]\n\n:: MiraDeclineFeed\n<<set $hunger to Math.min(100, $hunger + 4)>>\n<<set $humanity to Math.min(100, $humanity + 3)>>\n<<set $miraTrust to $miraTrust + 1>>\nYou watch her lock the register, hum along badly to the radio, flip the sign to CLOSED — and you turn around and walk back out into the street with the hunger gnawing, unfed, unresolved. It's not nothing, choosing this. It doesn't fill you up. It doesn't have to, to matter.\n\n<<include \"SystemCheck\">>\n\n[[Head back to the hub.->TheCityHub]]\n\n:: MidtownAlleyHunt\nThe alleys behind the strip run parallel to the noise, dark enough that nobody looks twice at another shape in the shadows. Two heartbeats present themselves within a block of each other: a reveler peeling off from a bachelorette party, swaying and singing to herself, and a stockroom worker finishing a late shift, keys already out, walking fast toward a car with a child seat visible in the back.\n\n<<include \"SystemCheck\">>\n\n[[Follow the drunk reveler — an easier, lower-stakes target.->HuntDrunkReveler]]\n[[Follow the late-shift worker — more blood, more to lose.->HuntLateShiftWorker]]\n[[Neither. Head back to the hub.->TheCityHub]]\n\n:: HuntDrunkReveler\nShe's easy to catch up to, easy to steer into a doorway on the pretext of helping her stand. She's so far gone she barely registers what's happening, laughing softly even as your teeth find her throat, like this is just one more strange thing that happened to her tonight that she won't clearly remember tomorrow.\n\n[[Take a careful pull and set her down safely.->AlleyRevelerCareful]]\n[[Take more than you should. She's drunk — she won't remember the details anyway.->AlleyRevelerReckless]]\n\n:: AlleyRevelerCareful\n<<set $hunger to Math.max(0, $hunger - 24)>>\n<<set $humanity to Math.min(100, $humanity + 2)>>\n<<set $heat to $heat + 2>>\n<<set $carefulStreak to $carefulStreak + 1>>\n<<set $recklessCount to 0>>\n<<set $feedsCareful to $feedsCareful + 1>>\nYou take just enough, prop her against the doorway with her purse still on her shoulder, and by the time you're gone she's already forgetting why she sat down. Tomorrow this is a blackout story she tells her friends, not a police report.\n\n<<include \"SystemCheck\">>\n\n[[Head back to the hub.->TheCityHub]]\n\n:: AlleyRevelerReckless\n<<set $hunger to Math.max(0, $hunger - 40)>>\n<<set $humanity to Math.max(0, $humanity - 6)>>\n<<set $heat to $heat + 10>>\n<<set $recklessCount to $recklessCount + 1>>\n<<set $carefulStreak to 0>>\n<<set $feedsReckless to $feedsReckless + 1>>\nYou let yourself have more than you need, reasoning — while some quieter part of you keeps count of the reasoning — that no one will believe her account of the night even if she remembers it. She's pale and shaking when you leave her sitting against the doorway, and a passerby is already crouching next to her before you've made it to the end of the block.\n\n<<include \"SystemCheck\">>\n\n[[Get clear of the block.->TheCityHub]]\n\n:: HuntLateShiftWorker\nHe's got his keys laced through his fingers already, the small defensive habit of someone who's read the pamphlets about parking lots at night, and he clocks you approaching a half-second before you're on him — fast enough to almost matter, not fast enough to matter at all.\n\nThere's a photo on his keychain. A kid, maybe six, gap-toothed, grinning at whoever held the camera.\n\n<<include \"SystemCheck\">>\n\n[[Feed carefully. Take only what won't be missed, and let him drive home confused but fine.->WorkerFeedCareful]]\n[[Feed hard. You need this more than you need his night to go well.->WorkerFeedReckless]]\n[[The photo stops you. Walk away.->WorkerDecline]]\n\n:: WorkerFeedCareful\n<<set $hunger to Math.max(0, $hunger - 30)>>\n<<set $humanity to Math.min(100, $humanity + 1)>>\n<<set $heat to $heat + 3>>\n<<set $carefulStreak to $carefulStreak + 1>>\n<<set $recklessCount to 0>>\n<<set $feedsCareful to $feedsCareful + 1>>\nYou make yourself slow down, make yourself stop while his hands are still steady enough to find his keys again. He sits in his car for ten minutes afterward, forehead on the wheel, chalking the dizziness up to exhaustion, and then he drives home to the kid in the photo, alive and unaware of how close a thing tonight actually was.\n\n<<include \"SystemCheck\">>\n\n[[Head back to the hub.->TheCityHub]]\n\n:: WorkerFeedReckless\n<<set $hunger to Math.max(0, $hunger - 50)>>\n<<set $humanity to Math.max(0, $humanity - 14)>>\n<<set $heat to $heat + 16>>\n<<set $recklessCount to $recklessCount + 1>>\n<<set $carefulStreak to 0>>\n<<set $feedsReckless to $feedsReckless + 1>>\nYou don't stop at what you need. You stop when your body decides it's had enough, and by then he's unconscious in the driver's seat, breathing but far too slow, and the photo on his keychain is somehow the only thing in the entire scene you can't stop looking at.\n\nYou leave him there. You tell yourself he'll be found. You don't stay to check.\n\n<<include \"SystemCheck\">>\n\n[[Get away from the lot.->TheCityHub]]\n\n:: WorkerDecline\n<<set $hunger to Math.min(100, $hunger + 3)>>\n<<set $humanity to Math.min(100, $humanity + 4)>>\nYou let him go. He drives off none the wiser, and you stand alone in the lot with the hunger complaining loudly about a meal you chose not to have, for reasons the System has no field to record.\n\n<<include \"SystemCheck\">>\n\n[[Head back to the hub.->TheCityHub]]\n\n:: MidtownWitnessEvent\n<<set $heat to $heat + 8>>\nSomeone on the street corner is on their phone, voice pitched high and scared, describing \"a person, I don't know, they moved wrong\" to whoever's on the other end. They're not looking at you. Not yet. But the description isn't wrong, and it isn't going nowhere.\n\n<<include \"SystemCheck\">>\n\n[[Get off the street before they look up.->TheCityHub]]\n\n:: DocksEntry\n<<set $visitedDocks to true>>\n<<set $hunger to Math.min(100, $hunger + 3)>>\nThe Docks are quieter than Midtown in a way that feels less like peace and more like held breath. Shipping containers stacked in canyons, sodium lights half of them dead, water slapping against pilings somewhere out of sight. This ground isn't unclaimed like Midtown — you can feel that much even without knowing why, a kind of territorial static in the air.\n\n<<if $metKestrel>>\nA shape you now recognize is sitting on a container rail up ahead, unmoving, watching the water. Kestrel.\n[[Go talk to Kestrel.->DocksKestrelMeet]]\n<<else>>\nSomeone is sitting very still on a container rail up ahead, watching the black water like it owes them money.\n[[Approach the still figure.->DocksKestrelMeet]]\n<</if>>\n[[Hunt among the dockworkers and night-shift crews instead.->DocksHunt]]\n<<if $heat >= 35>>\n[[Something's wrong here tonight — the air feels watched.->DocksHunterSign]]\n<</if>>\n[[Head back to the hub.->TheCityHub]]\n\n:: DocksKestrelMeet\n<<set $metKestrel to true>>\nUp close, Kestrel doesn't look dangerous so much as tired in a way that's lasted centuries, not years — sunken eyes, an old coat, hands folded like they're used to waiting. They don't turn to look at you, but they speak anyway, like they clocked you the moment you crossed into the Docks.\n\n\"New,\" they say. Not a question. \"No sire worth the name, or you wouldn't be wandering around out here broadcasting like a lighthouse. What do you want, fledgling?\"\n\n[[Ask them what you are — really ask.->KestrelAskHelp]]\n[[Demand answers. You're done being confused.->KestrelThreaten]]\n[[Say nothing. Just listen.->KestrelListen]]\n\n:: KestrelAskHelp\n<<set $kestrelStanding to $kestrelStanding + 1>>\n<<set $humanity to Math.min(100, $humanity + 1)>>\n\"What am I,\" you say, and it comes out smaller than you meant it to.\n\nKestrel almost smiles. \"Hungry. Dangerous. Unclaimed, which around here is the same thing as unprotected. Beyond that — depends what you do next. The System you're carrying isn't wisdom, it's just bookkeeping. It'll tell you what happened. It won't tell you what to be.\" They finally look at you. \"That part's still yours. For now.\"\n\n<<include \"SystemCheck\">>\n\n[[Ask what \"for now\" means.->DocksKestrelMeet]]\n[[Thank them and step back.->DocksEntry]]\n\n:: KestrelThreaten\n<<set $kestrelStanding to $kestrelStanding - 3>>\n<<set $heat to $heat + 4>>\nYou take a step closer, some new and ugly confidence telling you that whatever you are now, you're strong enough to make demands of an old thing sitting alone on a dock at night.\n\nKestrel doesn't flinch, doesn't rise, just finally turns their head enough that you feel — physically feel, like a hand closing slow around your throat from the inside — exactly how much stronger they are than you. \"Careful,\" is all they say. The pressure lifts as suddenly as it came. \"I don't answer to threats from things that haven't survived a week yet. Ask nicely next time, or don't ask at all.\"\n\n<<include \"SystemCheck\">>\n\n[[Back off.->DocksEntry]]\n\n:: KestrelListen\n<<set $kestrelStanding to $kestrelStanding + 2>>\nYou say nothing. You just stay, and listen, and let the silence stretch long enough that Kestrel eventually fills it on their own terms instead of yours — which, you're beginning to understand, is the only way anyone this old ever really tells you anything.\n\n\"Feed like you have a choice, every time, even the times you don't,\" they say, eyes back on the water. \"That's the whole discipline, before it's a Discipline. Everyone who lasts learns that part first. Everyone who doesn't, doesn't.\"\n\n<<include \"SystemCheck\">>\n\n[[Sit with that a while longer.->DocksKestrelMeet]]\n[[Head back into the Docks.->DocksEntry]]\n\n:: DocksHunt\nDockworkers finishing overnight loads, a couple of figures who look like they're moving something nobody filed paperwork for, a security guard doing rounds with a flashlight and no real conviction — the Docks offer rougher prey than Midtown, people less likely to be believed if they report something, but also less predictable, some of them armed, all of them used to watching their backs.\n\n<<include \"SystemCheck\">>\n\n[[Take the security guard — isolated, routine, easy to time.->DocksHuntCareful]]\n[[Take one of the smugglers — nobody's calling the police about this one.->DocksHuntReckless]]\n[[Not tonight. Head back.->DocksEntry]]\n\n:: DocksHuntCareful\n<<set $hunger to Math.max(0, $hunger - 27)>>\n<<set $humanity to Math.min(100, $humanity + 1)>>\n<<set $heat to $heat + 3>>\n<<set $carefulStreak to $carefulStreak + 1>>\n<<set $recklessCount to 0>>\n<<set $feedsCareful to $feedsCareful + 1>>\nYou time his second lap, catch him in the gap between two containers where the cameras don't reach, and take exactly what the hunger needs and not one pull more. He clocks back in at the end of his shift with a headache he blames on the energy drinks, and no one ever asks him a single question about it.\n\n<<include \"SystemCheck\">>\n\n[[Head back to the hub.->TheCityHub]]\n\n:: DocksHuntReckless\n<<set $hunger to Math.max(0, $hunger - 42)>>\n<<set $humanity to Math.max(0, $humanity - 7)>>\n<<set $heat to $heat + 12>>\n<<set $okaforAwareness to $okaforAwareness + 1>>\n<<set $recklessCount to $recklessCount + 1>>\n<<set $carefulStreak to 0>>\n<<set $feedsReckless to $feedsReckless + 1>>\nYou reason, going in, that a smuggler is nobody's idea of a sympathetic victim. You don't reason your way back out again until he's on the ground and his two associates are already shouting into radios about \"the thing\" that just took their friend apart. Nobody official comes for this. Something worse might: this crew has its own reasons not to want unexplained bodies drawing attention to their shipments, and now they have a reason to go looking for you specifically.\n\n<<include \"SystemCheck\">>\n\n[[Get out before the shouting brings more of them.->TheCityHub]]\n\n:: DocksHunterSign\n<<set $okaforAwareness to $okaforAwareness + 1>>\nChalk marks on a container that aren't graffiti. A parked sedan with two people inside who haven't gotten out in twenty minutes, engine running for the heat, not the drive. A card, half-soaked, wedged under a pallet: DET. A. OKAFOR, MAJOR CRIMES, with a case number scrawled on the back in pen.\n\nSomebody official is already asking questions about \"the bloodless ones\" — and the Docks, apparently, is where they've started asking.\n\n<<if $disciplines.includes(\"Auspex\")>>\nAuspex hums low under your skin, a warning-before-the-warning: that sedan's engine just changed pitch. They're about to move.\n[[Get clear before they do.->DocksEntry]]\n<<else>>\n[[Get clear while you still can.->DocksEntry]]\n<</if>>\n[[Approach the sedan. See what they know.->DocksHunterEncounter]]\n\n:: DocksHunterEncounter\n<<set $heat to $heat + 10>>\n<<set $okaforAwareness to $okaforAwareness + 2>>\nThe window rolls down before you're within ten feet. The woman behind the wheel has the particular stillness of someone who has already decided you're not a person she needs to be polite to. \"Detective Okafor,\" she says, badge held low, almost bored. \"You want to explain why you just walked up to an unmarked car at one in the morning instead of walking the other way like literally everyone else does?\"\n\nHer partner's hand hasn't moved from somewhere below the dash.\n\n<<if $disciplines.includes(\"Obfuscate\")>>\n[[Let Obfuscate blur their memory of your face and slip away.->HunterEvadeObfuscate]]\n<</if>>\n[[Talk your way out. Ordinary. Boring. Nothing to see.->HunterEvadeTalk]]\n[[Run.->HunterEvadeRun]]\n\n:: HunterEvadeObfuscate\n<<set $heat to Math.max(0, $heat - 20)>>\nYou let the discipline do what it's built for — not invisibility, just wrongness, a face that slides off memory the second attention moves away from it. Okafor blinks, frowns, says something about how she thought there'd been someone there, and by the time her partner looks up you're three containers away and gaining distance.\n\n<<include \"SystemCheck\">>\n\n[[Keep moving.->DocksEntry]]\n\n:: HunterEvadeTalk\n<<set $heat to Math.max(0, $heat - 8)>>\n<<set $humanity to Math.min(100, $humanity + 1)>>\nYou put your hands where she can see them, mumble something about a shortcut and insomnia, and lean hard into looking like exactly the kind of harmless that gets waved off at one in the morning. It mostly works. She lets you go with a look that says she's filing your face away regardless, badge or no badge.\n\n<<include \"SystemCheck\">>\n\n[[Walk away slowly. Don't run.->DocksEntry]]\n\n:: HunterEvadeRun\n<<set $heat to $heat + 15>>\n<<set $humanity to Math.max(0, $humanity - 4)>>\n<<set $okaforAwareness to $okaforAwareness + 2>>\nYou run, and your new body does something with speed and container-canyons that a human sprinter simply couldn't, and you lose them inside two blocks. You also just confirmed, in the most physically undeniable way possible, that you are exactly the kind of thing Detective Okafor has been building a file on. She doesn't forget that.\n\n<<include \"SystemCheck\">>\n\n[[Get somewhere dark and still.->TheCityHub]]\n\n:: HollowEntry\n<<set $visitedHollow to true>>\n<<set $hunger to Math.min(100, $hunger + 4)>>\nAshgrove Hollow announces itself before you're fully inside it: the streetlights get sparser, the cemetery wall runs along one whole side of the road, and the quiet has a pressure to it, like walking into a room where a conversation just stopped. This ground is claimed. You can feel that as a fact in your body, the way you'd feel a hand on your shoulder before you'd see whose it was.\n\n<<if $hollowResolved>>\nThe claim-feeling still sits on the back of your neck, but it's settled into something closer to a held truce than a raised hand, at least for tonight.\n[[Move through the Hollow carefully.->HollowKestrelLore]]\n<<else>>\n[[Press further in anyway.->HollowTrespassChoice]]\n<</if>>\n[[This isn't worth it tonight. Turn back.->TheCityHub]]\n\n:: HollowTrespassChoice\nGravestones lean at angles that predate the city grid around them. Somewhere close, you can hear — feel, almost — something that isn't a heartbeat at all, something colder and steadier, like a held note.\n\n<<include \"SystemCheck\">>\n\n[[Keep going toward it.->HollowRivalEncounter]]\n[[This is someone else's ground. Turn back now, while you still can.->HollowRetreat]]\n\n:: HollowRetreat\n<<set $heat to Math.max(0, $heat - 2)>>\n<<set $humanity to Math.min(100, $humanity + 1)>>\nYou turn around before whatever's out among the stones decides you're worth its attention, and the pressure on the back of your neck eases with every step back toward the wall. Not every fight is one you have to have on someone else's ground on your first week undead.\n\n<<include \"SystemCheck\">>\n\n[[Head back to the hub.->TheCityHub]]\n\n:: HollowRivalEncounter\n<<set $hollowResolved to true>>\nA figure steps out from between two mausoleums without a sound, which shouldn't be possible on gravel, and definitely shouldn't be possible for someone your senses insist is built like a linebacker. Their eyes catch what little light there is and throw it back wrong.\n\n\"You're standing in the Hollow Court's ground, fledgling,\" they say, almost gently, which is somehow worse than if they'd shouted it. \"That's usually a one-time mistake. How you leave here is up to you.\"\n\n[[Back down. Apologize. Leave.->HollowSubmit]]\n[[Try to talk your way to an understanding.->HollowBargain]]\n[[You're not backing down from anyone. Fight.->HollowFight]]\n\n:: HollowSubmit\n<<set $heat to Math.max(0, $heat - 5)>>\n<<set $humanity to Math.max(0, $humanity - 3)>>\nYou lower your eyes, mumble something about not knowing the borders, and back away with your hands visible and your pride somewhere on the ground behind you. The enforcer watches you go without moving, and the shame of it sits worse than you expected — proof that whatever you are now, self-preservation still outranks dignity most nights.\n\n<<include \"SystemCheck\">>\n\n[[Leave the Hollow.->TheCityHub]]\n\n:: HollowBargain\n<<set $heat to $heat + 5>>\n\"I didn't know the ground was claimed,\" you say, which is true, and somehow that lands better than an apology would have. The enforcer studies you for a long moment — long enough that you can feel your own pulse-that-isn't-a-pulse in your ears — and then, unexpectedly, huffs something like a laugh.\n\n\"Ignorant, not stupid. There's a difference, and it'll keep you alive a little longer than most of your kind manage.\" They step back, motion toward the wall. \"Learn the borders. Don't test them twice.\"\n\n<<include \"SystemCheck\">>\n\n[[Leave the Hollow, borders noted.->TheCityHub]]\n\n:: HollowFight\n<<set $humanity to Math.max(0, $humanity - 12)>>\n<<set $heat to $heat + 10>>\n<<set $recklessCount to $recklessCount + 2>>\nYou go in swinging, and for about four seconds it even seems to work — until the enforcer stops toying with you and shows you exactly how much older, stronger, and more patient they actually are. You end up face-down in wet gravel with a knee between your shoulder blades and a voice at your ear informing you, almost bored, that they could end you right now and no one would ever ask a single question about it.\n\nThey let you up anyway. \"Discipline,\" they say, stepping back, \"is what that was supposed to teach you. Don't waste the lesson.\" Something in your body has changed, cold and permanent, learned the hard way.\n\n<<include \"SystemCheck\">>\n\n[[Limp out of the Hollow.->TheCityHub]]\n\n:: HollowKestrelLore\n<<set $humanity to Math.min(100, $humanity + 1)>>\n<<if $metKestrel && $kestrelStanding >= 2>>\nYou think of something Kestrel said and, for once, take the careful path through instead of the direct one — skirting the mausoleums, staying off the gravel where footsteps carry. It works. Nothing stirs. Whatever claims this ground, tonight it doesn't feel the need to remind you.\n<<else>>\nYou move through as quietly as you can manage, and mostly, tonight, that's enough.\n<</if>>\n\n<<include \"SystemCheck\">>\n\n[[Head back to the hub.->TheCityHub]]\n\n:: FrenzyEvent\n<<set $hunger to 15>>\n<<set $humanity to Math.max(0, $humanity - 15)>>\n<<set $heat to $heat + 25>>\n<<set $recklessCount to $recklessCount + 1>>\n<<set $carefulStreak to 0>>\n<<set $feedsReckless to $feedsReckless + 1>>\nThere's no decision-making left in you by this point, just need, and the city is a maze of heartbeats and your body picks one and moves before the part of you that might have chosen differently even gets a vote. You come back to yourself minutes later, kneeling over a stranger on wet pavement, mouth and hands red, with absolutely no memory of the choosing.\n\n<div class=\"sys-pulse\"><strong>[ SYSTEM ]</strong> Frenzy state resolved. Autonomous feeding behavior logged.<br>The System does not judge. The System only records — but the gap where your choice should have been is real, and it doesn't close on its own.</div>\n\n[[Try to understand what just happened to you.->FrenzyAftermath]]\n\n:: FrenzyAftermath\nYou check — hands shaking, mind catching up late to a body that already finished the job — and the stranger is breathing. Ragged, but breathing. That's the only mercy tonight bought you, and you didn't even choose it.\n\nLetting the hunger get this far wasn't a decision so much as the absence of one. Whatever you decide to do about that starts now, walking away from someone else's worst night, carrying a little less of yourself than you had an hour ago.\n\n<<include \"SystemCheck\">>\n\n[[Back to the street. More careful, this time.->TheCityHub]]\n\n:: HunterAmbush\n<<set $okaforAwareness to $okaforAwareness + 2>>\nThey come out of three directions at once, professional about it, no wasted movement — Okafor at the center, flanked by two others who move like they've done this before and survived it. \"We know what you are,\" she says, not unkindly, which is almost the most unsettling part. \"We know roughly how many people you've fed on in the last week. Tonight's the night that stops, one way or another.\"\n\n<<if $disciplines.length > 0>>\n[[Choose how this ends.->HunterAmbushChoice]]\n<<else>>\nYou have nothing built up to fall back on — no learned trick, no unnatural speed, no shadow to fold into. Just whatever you can do with a body that's still, functionally, new to you.\n\n[[Choose how this ends.->HunterAmbushChoice]]\n<</if>>\n\n:: HunterAmbushChoice\nA half-second window, no more. Whatever you're going to do about this, you do it now.\n\n<<if $disciplines.includes(\"Potence\")>>\n[[Fight your way through — Potence gives you the strength to try.->HunterFightPotence]]\n<</if>>\n<<if $disciplines.includes(\"Obfuscate\")>>\n[[Fold into shadow and vanish — Obfuscate gives you the cover.->HunterFleeObfuscate]]\n<</if>>\n[[Fight with nothing but what you've got.->HunterFightRaw]]\n[[Run with nothing but what you've got.->HunterFleeRaw]]\n\n:: HunterFightPotence\n<<set $heat to Math.max(0, $heat - 25)>>\n<<set $humanity to Math.max(0, $humanity - 8)>>\nPotence turns a hopeless fight into a survivable one — you break through the flanking pair hard enough to buy yourself a head start, and by the time Okafor's radioing for backup you're three rooftops away. It costs you something to hurt them to get free, and you know it, and you keep running anyway.\n\n<<include \"SystemCheck\">>\n\n[[Get somewhere they can't follow.->TheCityHub]]\n\n:: HunterFleeObfuscate\n<<set $heat to Math.max(0, $heat - 40)>>\nYou go still, go quiet, let Obfuscate do the work Potence can't — not fighting your way out, just becoming the kind of nothing that professional attention slides right off of. Okafor's team searches a three-block radius and finds an empty alley and a very confused sense that they had someone cornered a minute ago.\n\n<<include \"SystemCheck\">>\n\n[[Slip away while they're still looking.->TheCityHub]]\n\n:: HunterFightRaw\n<<set $heat to Math.max(0, $heat - 12)>>\n<<set $humanity to Math.max(0, $humanity - 10)>>\nIt's not a fight so much as a scramble — you get lucky more than you get skilled, take a hit that should probably have done more damage than it did, and manage to put enough distance and debris between you and them to break line of sight. It's ugly and it's close and it works, barely, and you know without being told that \"barely\" isn't a strategy you get to rely on twice.\n\n<<include \"SystemCheck\">>\n\n[[Keep moving until your legs remember how to stop shaking.->TheCityHub]]\n\n:: HunterFleeRaw\n<<set $heat to Math.max(0, $heat - 15)>>\n<<set $humanity to Math.min(100, $humanity + 1)>>\nYou run, plain and simple, no trick to fall back on, just a new body's speed against three people who trained for exactly this. It's closer than it should be. You make it, ducking through a gap they don't quite manage to cover in time, and you don't stop running until the city noise swallows the sound of pursuit behind you.\n\n<<include \"SystemCheck\">>\n\n[[Don't stop until you're sure.->TheCityHub]]\n\n:: NightReflection\n<<set $turn to 0>>\nYou find somewhere still to let the night settle, and take stock of what it actually cost you.\n\n<div class=\"sys-pulse\">\n<strong>[ SYSTEM — NIGHTLY SUMMARY ]</strong><br>\nHunger: <strong>$hunger</strong>/100 &nbsp;|&nbsp; Humanity: <strong>$humanity</strong>/100 &nbsp;|&nbsp; Notoriety: <strong>$heat</strong>/100<br>\nCareful feedings: $feedsCareful &nbsp;|&nbsp; Reckless feedings: $feedsReckless<br>\nDisciplines known: <<if $disciplines.length > 0>><<print $disciplines.join(\", \")>><<else>>none yet<</if>>\n</div>\n\n<<if $humanity >= 70>>\nWhatever you're becoming, some part of you is still choosing it deliberately, still weighing a stranger's life against your own hunger and landing, more often than not, on mercy. That won't get easier. Tonight, at least, it held.\n<<elseif $humanity >= 40>>\nYou're not who you were a week ago, and you're honest enough with yourself, in the quiet after feeding, to know it. The choices are getting easier to make and harder to feel. That's worth noticing before it stops being true.\n<<else>>\nIt's getting harder to remember exactly what you were protecting by staying careful in the first place. The hunger doesn't have to argue with you as hard as it used to. That should probably frighten you more than it does.\n<</if>>\n\nThere's no sire to report to, no coven waiting to judge the tally, no ending screen. Just the city, still out there, still hungry in its own way, waiting to see what you do with tomorrow night.\n\n<<set $hunger to Math.min(100, $hunger + 6)>>\n\n[[Go back out. It isn't over.->TheCityHub]]\n";
+
+/* ==== Controller ==== */
+(function(){
+  let engine = null;
+
+  const passageEl = document.getElementById('passage');
+  const choicesEl = document.getElementById('choices');
+  const statusEl = document.getElementById('statusStrip');
+  const discEl = document.getElementById('disciplinesRow');
+  const restartBtn = document.getElementById('restartBtn');
+
+  function ticks(value, count){
+    const filled = Math.round((Math.max(0,Math.min(100,value)) / 100) * count);
+    let html = '';
+    for(let i=0;i<count;i++){
+      html += '<span class="' + (i < filled ? 'on' : '') + '"></span>';
+    }
+    return html;
+  }
+
+  function renderStatus(){
+    const s = engine.state;
+    const gauges = [
+      {key:'hunger', label:'Hunger', value:s.hunger, critical: s.hunger >= 85},
+      {key:'humanity', label:'Humanity', value:s.humanity, critical: s.humanity <= 40},
+      {key:'heat', label:'Notoriety', value:s.heat, critical: s.heat >= 60}
+    ];
+    statusEl.innerHTML = gauges.map(g =>
+      '<div class="gauge ' + g.key + (g.critical ? ' critical' : '') + '">' +
+        '<div class="gauge-label"><span>' + g.label + '</span><span class="val">' + Math.round(g.value) + '</span></div>' +
+        '<div class="ticks">' + ticks(g.value, 20) + '</div>' +
+      '</div>'
+    ).join('');
+
+    const known = (s.disciplines || []);
+    discEl.innerHTML = known.length
+      ? known.map(d => '<span class="tag">' + d + '</span>').join('')
+      : '<span style="opacity:.5">no disciplines surfaced yet</span>';
+  }
+
+  function go(name){
+    let result;
+    try {
+      result = engine.goto(name);
+    } catch (e) {
+      passageEl.innerHTML = '<p style="color:#c93a4c">A tear in the narrative: ' + (e && e.message ? e.message : e) + '</p>';
+      choicesEl.innerHTML = '';
+      console.error(e);
+      return;
+    }
+    passageEl.innerHTML = result.html;
+    renderStatus();
+
+    choicesEl.innerHTML = '';
+    if (result.choices.length === 0) {
+      choicesEl.innerHTML = '<p style="font-family:\'JetBrains Mono\',monospace;font-size:.8rem;color:var(--muted)">— no further paths from here —</p>';
+    } else {
+      const row = document.createElement('div');
+      row.className = 'choice-row';
+      result.choices.forEach(c => {
+        const a = document.createElement('a');
+        a.href = '#';
+        a.className = 'choice-link';
+        a.textContent = c.text;
+        a.dataset.target = c.target;
+        a.addEventListener('click', function(ev){
+          ev.preventDefault();
+          window.scrollTo({top:0, behavior:'smooth'});
+          go(c.target);
+        });
+        row.appendChild(a);
+      });
+      choicesEl.appendChild(row);
+    }
+  }
+
+  function start(){
+    engine = BLZCreateEngine(TWEE_SOURCE);
+    go(engine.startPassage);
+  }
+
+  restartBtn.addEventListener('click', function(){
+    if (window.confirm('Begin the night again from the start?')) start();
+  });
+
+  start();
+})();
+</script>

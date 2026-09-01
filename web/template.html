@@ -1,0 +1,356 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blood Level Zero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0a0908;
+    --panel:#141210;
+    --panel-2:#1b1815;
+    --rule:#332723;
+    --blood-deep:#5c141f;
+    --blood:#9c2233;
+    --blood-bright:#c93a4c;
+    --system:#8fa39c;
+    --system-dim:#5d6d68;
+    --bone:#ddd3c4;
+    --bone-dim:#9a9086;
+    --muted:#6b6259;
+    --warn:#c9963a;
+    font-size:16px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--void);
+    color:var(--bone);
+    font-family:'Spectral',Georgia,'Times New Roman',serif;
+    font-size:1.05rem;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    position:relative;
+    overflow-x:hidden;
+  }
+
+  @keyframes grain-shift{
+    0%,100%{ transform:translate(0,0); }
+    20%{ transform:translate(-2%,-3%); }
+    40%{ transform:translate(-4%,2%); }
+    60%{ transform:translate(2%,-2%); }
+    80%{ transform:translate(3%,3%); }
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:-10%;
+    pointer-events:none;
+    z-index:1;
+    opacity:.05;
+    mix-blend-mode:overlay;
+    background-image:
+      radial-gradient(circle at 20% 30%, #fff 0, transparent 40%),
+      radial-gradient(circle at 80% 10%, #fff 0, transparent 35%),
+      radial-gradient(circle at 60% 80%, #fff 0, transparent 45%),
+      radial-gradient(circle at 10% 90%, #fff 0, transparent 30%);
+    background-size:180% 180%;
+    animation:grain-shift 9s steps(8) infinite;
+  }
+  @media (prefers-reduced-motion:reduce){
+    body::before{ animation:none; }
+  }
+
+  #app{
+    position:relative; z-index:2;
+    max-width:680px;
+    margin:0 auto;
+    padding:0 22px 96px;
+  }
+
+  /* ---- Masthead ---- */
+  .masthead{
+    padding:26px 0 14px;
+    border-bottom:1px solid var(--rule);
+    margin-bottom:0;
+  }
+  .wordmark{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.72rem;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--system);
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .wordmark .title{ color:var(--bone-dim); }
+  .wordmark .dot{ color:var(--blood-bright); }
+  .restart-link{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.68rem;
+    letter-spacing:.1em;
+    color:var(--muted);
+    text-decoration:none;
+    text-transform:uppercase;
+    border:1px solid var(--rule);
+    padding:3px 8px;
+    cursor:pointer;
+    background:transparent;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .restart-link:hover{ color:var(--blood-bright); border-color:var(--blood-deep); }
+  .restart-link:focus-visible{ outline:2px solid var(--system); outline-offset:2px; }
+
+  /* ---- Status strip ---- */
+  .status{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+    padding:14px 0 18px;
+    border-bottom:1px solid var(--rule);
+    margin-bottom:22px;
+  }
+  .gauge{ display:flex; flex-direction:column; gap:5px; }
+  .gauge-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.62rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--muted);
+    display:flex;
+    justify-content:space-between;
+  }
+  .gauge-label .val{
+    color:var(--bone-dim);
+    font-variant-numeric:tabular-nums;
+  }
+  .ticks{
+    display:flex;
+    gap:2px;
+    height:8px;
+  }
+  .ticks span{
+    flex:1 1 0;
+    background:var(--panel-2);
+    border-top:1px solid var(--rule);
+  }
+  .ticks span.on{ background:var(--fill,var(--system)); border-top-color:var(--fill,var(--system)); }
+  .gauge.hunger .ticks span.on{ --fill:var(--warn); }
+  .gauge.humanity .ticks span.on{ --fill:var(--system); }
+  .gauge.heat .ticks span.on{ --fill:var(--blood-bright); }
+  .gauge.critical .gauge-label .val{ color:var(--blood-bright); }
+
+  .disciplines-row{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.66rem;
+    letter-spacing:.08em;
+    color:var(--system-dim);
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin:-6px 0 22px;
+    min-height:1em;
+  }
+  .disciplines-row .tag{
+    border:1px solid var(--rule);
+    padding:2px 7px;
+    color:var(--system);
+    text-transform:uppercase;
+  }
+
+  /* ---- Passage text ---- */
+  #passage{ min-height:40vh; }
+  #passage p{
+    margin:0 0 1.15em;
+    color:var(--bone);
+  }
+  #passage p:first-of-type::first-letter{
+    color:var(--blood-bright);
+  }
+  #passage strong{ color:var(--bone); font-weight:600; }
+  #passage em{ color:var(--bone-dim); }
+
+  .sys-pulse{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.82rem;
+    line-height:1.6;
+    color:var(--system);
+    background:var(--panel);
+    border:1px solid var(--rule);
+    border-left:3px solid var(--blood);
+    padding:12px 14px;
+    margin:20px 0;
+    letter-spacing:.01em;
+    animation:pulse-in .35s ease both;
+  }
+  .sys-pulse strong{ color:var(--blood-bright); font-weight:700; }
+  @keyframes pulse-in{
+    from{ opacity:0; transform:translateY(-4px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  @media (prefers-reduced-motion:reduce){
+    .sys-pulse{ animation:none; }
+  }
+
+  /* ---- Choices ---- */
+  #choices{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-top:26px;
+  }
+  .choice-row{ display:contents; }
+  a.choice-link{
+    display:block;
+    font-family:'JetBrains Mono',monospace;
+    font-size:.86rem;
+    letter-spacing:.01em;
+    color:var(--bone);
+    text-decoration:none;
+    background:var(--panel);
+    border:1px solid var(--rule);
+    padding:11px 14px;
+    transition:border-color .15s ease, background .15s ease, color .15s ease, padding-left .15s ease;
+  }
+  a.choice-link::before{
+    content:"›";
+    display:inline-block;
+    width:1.1em;
+    color:var(--blood);
+  }
+  a.choice-link:hover{
+    border-color:var(--blood-deep);
+    background:var(--panel-2);
+    color:#fff;
+    padding-left:18px;
+  }
+  a.choice-link:hover::before{ color:var(--blood-bright); }
+  a.choice-link:focus-visible{ outline:2px solid var(--system); outline-offset:1px; }
+
+  footer.notice{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.62rem;
+    color:var(--muted);
+    letter-spacing:.04em;
+    margin-top:48px;
+    padding-top:16px;
+    border-top:1px solid var(--rule);
+  }
+
+  ::selection{ background:var(--blood-deep); color:#fff; }
+</style>
+
+<div id="app">
+  <div class="masthead">
+    <div class="wordmark">
+      <span class="title">Blood Level Zero<span class="dot">.</span></span>
+      <button class="restart-link" id="restartBtn" type="button">↺ begin again</button>
+    </div>
+  </div>
+
+  <div class="status" id="statusStrip" aria-hidden="true"></div>
+  <div class="disciplines-row" id="disciplinesRow"></div>
+
+  <main id="passage" aria-live="polite"></main>
+  <div id="choices"></div>
+
+  <footer class="notice">SYSTEM ONLINE — TRACKING ACTIVE — SIRE: UNKNOWN — a Twine work-in-progress, playable build</footer>
+</div>
+
+<script>
+/* ==== Blood Level Zero — embedded engine (SugarCube-subset interpreter) ==== */
+/*__ENGINE_JS__*/
+
+/* ==== Story source (identical to blood_level_zero.twee) ==== */
+const TWEE_SOURCE = __TWEE_SOURCE_JSON__;
+
+/* ==== Controller ==== */
+(function(){
+  let engine = null;
+
+  const passageEl = document.getElementById('passage');
+  const choicesEl = document.getElementById('choices');
+  const statusEl = document.getElementById('statusStrip');
+  const discEl = document.getElementById('disciplinesRow');
+  const restartBtn = document.getElementById('restartBtn');
+
+  function ticks(value, count){
+    const filled = Math.round((Math.max(0,Math.min(100,value)) / 100) * count);
+    let html = '';
+    for(let i=0;i<count;i++){
+      html += '<span class="' + (i < filled ? 'on' : '') + '"></span>';
+    }
+    return html;
+  }
+
+  function renderStatus(){
+    const s = engine.state;
+    const gauges = [
+      {key:'hunger', label:'Hunger', value:s.hunger, critical: s.hunger >= 85},
+      {key:'humanity', label:'Humanity', value:s.humanity, critical: s.humanity <= 40},
+      {key:'heat', label:'Notoriety', value:s.heat, critical: s.heat >= 60}
+    ];
+    statusEl.innerHTML = gauges.map(g =>
+      '<div class="gauge ' + g.key + (g.critical ? ' critical' : '') + '">' +
+        '<div class="gauge-label"><span>' + g.label + '</span><span class="val">' + Math.round(g.value) + '</span></div>' +
+        '<div class="ticks">' + ticks(g.value, 20) + '</div>' +
+      '</div>'
+    ).join('');
+
+    const known = (s.disciplines || []);
+    discEl.innerHTML = known.length
+      ? known.map(d => '<span class="tag">' + d + '</span>').join('')
+      : '<span style="opacity:.5">no disciplines surfaced yet</span>';
+  }
+
+  function go(name){
+    let result;
+    try {
+      result = engine.goto(name);
+    } catch (e) {
+      passageEl.innerHTML = '<p style="color:#c93a4c">A tear in the narrative: ' + (e && e.message ? e.message : e) + '</p>';
+      choicesEl.innerHTML = '';
+      console.error(e);
+      return;
+    }
+    passageEl.innerHTML = result.html;
+    renderStatus();
+
+    choicesEl.innerHTML = '';
+    if (result.choices.length === 0) {
+      choicesEl.innerHTML = '<p style="font-family:\'JetBrains Mono\',monospace;font-size:.8rem;color:var(--muted)">— no further paths from here —</p>';
+    } else {
+      const row = document.createElement('div');
+      row.className = 'choice-row';
+      result.choices.forEach(c => {
+        const a = document.createElement('a');
+        a.href = '#';
+        a.className = 'choice-link';
+        a.textContent = c.text;
+        a.dataset.target = c.target;
+        a.addEventListener('click', function(ev){
+          ev.preventDefault();
+          window.scrollTo({top:0, behavior:'smooth'});
+          go(c.target);
+        });
+        row.appendChild(a);
+      });
+      choicesEl.appendChild(row);
+    }
+  }
+
+  function start(){
+    engine = BLZCreateEngine(TWEE_SOURCE);
+    go(engine.startPassage);
+  }
+
+  restartBtn.addEventListener('click', function(){
+    if (window.confirm('Begin the night again from the start?')) start();
+  });
+
+  start();
+})();
+</script>
