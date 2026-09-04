@@ -6,7 +6,8 @@
   "start": "Awakening",
   "tag-colors": {
     "StoryInit": "gray",
-    "stylesheet": "gray"
+    "stylesheet": "gray",
+    "ending": "red"
   },
   "zoom": 0.25
 }
@@ -21,6 +22,9 @@ body { background: #0b0a0d; color: #d8d0d2; font-family: Georgia, 'Times New Rom
   padding: 10px 14px; margin: 14px 0; font-family: 'Courier New', monospace; font-size: 0.9em;
   letter-spacing: 0.02em; }
 .sys-pulse strong { color: #ff4d5e; }
+.ending-card { border: 1px solid #7a1f2b; border-left: 4px solid #ff4d5e; background: rgba(10,9,8,0.6);
+  padding: 16px 18px; margin: 18px 0; font-family: 'Courier New', monospace; font-size: 0.9em; }
+.ending-card strong { color: #ff4d5e; letter-spacing: 0.12em; }
 a.link-internal, a.macro-link { color: #c94b5a; }
 a.link-internal:hover, a.macro-link:hover { color: #ff8a95; }
 hr { border-color: #3a1418; }
@@ -30,24 +34,51 @@ hr { border-color: #3a1418; }
 <<set $humanity to 82>>
 <<set $heat to 6>>
 <<set $disciplines to []>>
+<<set $stepTier to 0>>
+<<set $strengthTier to 0>>
+<<set $senseTier to 0>>
+<<set $voiceTier to 0>>
+<<set $memoryTier to 0>>
+<<set $vigilTier to 0>>
 <<set $carefulStreak to 0>>
 <<set $recklessCount to 0>>
+<<set $feedsCareful to 0>>
+<<set $feedsReckless to 0>>
+<<set $feedsDeclined to 0>>
+<<set $scars to 0>>
+<<set $talkedDown to 0>>
 <<set $kestrelStanding to 0>>
 <<set $miraTrust to 0>>
 <<set $okaforAwareness to 0>>
-<<set $feedsCareful to 0>>
-<<set $feedsReckless to 0>>
+<<set $courtStanding to 0>>
+<<set $junieBond to 0>>
+<<set $sableStanding to 0>>
+<<set $midtownClaim to 0>>
 <<set $turn to 0>>
+<<set $nightsPassed to 1>>
+<<set $past to "">>
+<<set $pastName to "">>
 <<set $visitedMidtown to false>>
 <<set $visitedDocks to false>>
 <<set $visitedHollow to false>>
 <<set $metMira to false>>
 <<set $metKestrel to false>>
+<<set $metSable to false>>
+<<set $metJunie to false>>
+<<set $metVoss to false>>
+<<set $metIlse to false>>
 <<set $hollowResolved to false>>
+<<set $courtSummoned to false>>
+<<set $courtTaskDone to false>>
+<<set $okaforMet to false>>
+<<set $junieCalled to false>>
+<<set $sableResolved to false>>
 <<set $warnHunger to false>>
 <<set $warnHeat to false>>
 <<set $warnHumanity to false>>
 <<set $tutorialDone to false>>
+<<set $endgame to false>>
+<<set $endingRoute to "">>
 
 :: SystemCheck
 <<if $hunger >= 85 && !$warnHunger>>
@@ -71,17 +102,67 @@ hr { border-color: #3a1418; }
 <<if $humanity > 55 && $warnHumanity>>
 <<set $warnHumanity to false>>
 <</if>>
-<<if $carefulStreak >= 3 && !$disciplines.includes("Obfuscate")>>
-<<run $disciplines.push("Obfuscate")>>
-<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Discipline Unlocked: <strong>Obfuscate</strong><br>Three careful kills, three clean exits. You've learned to fold yourself into shadow and static memory. Future feedings and escapes run quieter.</div>
+<<if $stepTier == 0 && $carefulStreak >= 3>>
+<<set $stepTier to 1>>
+<<run $disciplines.push("Hollow Step")>>
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Power surfaced: <strong>Hollow Step</strong> — I<br>Three careful feedings, three clean exits. You have learned how to be the thing attention slides off of. Rooms forget the shape of you a half-second after you leave them.</div>
 <</if>>
-<<if $recklessCount >= 2 && !$disciplines.includes("Potence")>>
-<<run $disciplines.push("Potence")>>
-<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Discipline Unlocked: <strong>Potence</strong><br>Violence has taught your body something. Your strength has a new, colder edge to it.</div>
+<<if $stepTier == 1 && $feedsCareful >= 6 && $heat <= 45>>
+<<set $stepTier to 2>>
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> <strong>Hollow Step</strong> deepened — II<br>Not invisibility. Something worse for the people looking: you are now genuinely difficult to have seen. Pursuit loses the thread.</div>
 <</if>>
-<<if $kestrelStanding >= 4 && !$disciplines.includes("Auspex")>>
-<<run $disciplines.push("Auspex")>>
-<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Discipline Unlocked: <strong>Auspex</strong><br>Kestrel's lessons have opened something behind your eyes. You start to sense what's coming before it arrives.</div>
+<<if $stepTier == 2 && $feedsCareful >= 8 && $heat <= 25 && $nightsPassed >= 3>>
+<<set $stepTier to 3>>
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> <strong>Hollow Step</strong> mastered — III<br>You have kept your footprint smaller than your appetite for long enough that the city has stopped keeping a file. There are systems tracking this city's every camera and case number, and you are no longer in any of them.</div>
+<</if>>
+<<if $strengthTier == 0 && $recklessCount >= 2>>
+<<set $strengthTier to 1>>
+<<run $disciplines.push("Grave Strength")>>
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Power surfaced: <strong>Grave Strength</strong> — I<br>Violence has taught your body something it will not unlearn. Your grip closes with a weight that has nothing to do with muscle.</div>
+<</if>>
+<<if $strengthTier == 1 && $recklessCount >= 5>>
+<<set $strengthTier to 2>>
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> <strong>Grave Strength</strong> deepened — II<br>Doors, wrists, the frames of cars. Very little in this city is built to hold you now, and the part of you that notices that has stopped being alarmed by it.</div>
+<</if>>
+<<if $strengthTier == 2 && $scars >= 3>>
+<<set $strengthTier to 3>>
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> <strong>Grave Strength</strong> mastered — III<br>You have been put down three times and got up three times. Whatever is left in you now is the thing older Kindred are quietly careful around.</div>
+<</if>>
+<<if $senseTier == 0 && $kestrelStanding >= 4>>
+<<set $senseTier to 1>>
+<<run $disciplines.push("Wake-Sense")>>
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Power surfaced: <strong>Wake-Sense</strong> — I<br>Kestrel's patience has opened something behind your eyes. You feel the shape of a room's intentions a breath before the room commits to them.</div>
+<</if>>
+<<if $senseTier == 1 && $kestrelStanding >= 7>>
+<<set $senseTier to 2>>
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> <strong>Wake-Sense</strong> deepened — II<br>Not prophecy. Attention. You can read a street the way Kestrel reads water — where the current is going, and what is already waiting downstream of it.</div>
+<</if>>
+<<if $voiceTier == 0 && $talkedDown >= 2>>
+<<set $voiceTier to 1>>
+<<run $disciplines.push("Still Voice")>>
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Power surfaced: <strong>Still Voice</strong> — I<br>Twice now you have walked out of something that should have ended in blood by talking instead. Your voice has picked up a low steadiness that makes people want, briefly and against their judgment, to hear you out.</div>
+<</if>>
+<<if $voiceTier == 1 && $talkedDown >= 4 && $humanity >= 45>>
+<<set $voiceTier to 2>>
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> <strong>Still Voice</strong> deepened — II<br>You can hold a room now. Not command it — hold it, the way a hand holds a bird, and the frightening part is how badly people want to stay held.</div>
+<</if>>
+<<if $memoryTier == 0 && $feedsCareful >= 5 && $humanity >= 55>>
+<<set $memoryTier to 1>>
+<<run $disciplines.push("Blood Memory")>>
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Power surfaced: <strong>Blood Memory</strong> — I<br>You have been careful enough, often enough, to actually taste what you were taking. Blood carries the day it came from. You are starting to be able to read it.</div>
+<</if>>
+<<if $memoryTier == 1 && $feedsCareful >= 9>>
+<<set $memoryTier to 2>>
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> <strong>Blood Memory</strong> deepened — II<br>Further back than a day now. You can follow a life down its own current — who they feared, who they loved, and, in Kindred blood, whose blood made theirs.</div>
+<</if>>
+<<if $vigilTier == 0 && $scars >= 2>>
+<<set $vigilTier to 1>>
+<<run $disciplines.push("Cold Vigil")>>
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Power surfaced: <strong>Cold Vigil</strong> — I<br>You have been hurt badly twice and walked away from both. Your body has stopped treating damage as an emergency and started treating it as weather.</div>
+<</if>>
+<<if $vigilTier == 1 && $scars >= 4>>
+<<set $vigilTier to 2>>
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> <strong>Cold Vigil</strong> deepened — II<br>You endure past the point where enduring should have stopped being possible. It is not courage. It is just that the alternative has stopped being available to you.</div>
 <</if>>
 
 :: Awakening
@@ -95,12 +176,67 @@ Text scrawls into being at the bottom of your vision, unbidden, uninvited, preci
 
 <div class="sys-pulse"><strong>[ SYSTEM ]</strong> Vessel status: <strong>ACTIVE</strong>.<br>Subject reclassified. Sire: <strong>UNKNOWN</strong>. Coven: <strong>NONE</strong>.<br>Hunger tracking initialized.</div>
 
-[[You sit up.->FirstPulse]]
+[[You sit up.->ChoosePast]]
+
+:: ChoosePast
+You get as far as your elbows before the alley stops spinning. There's a wallet in your back pocket that you're afraid to open and a phone with a cracked screen and nineteen percent battery, and both of them belong to a person you are increasingly certain you are no longer.
+
+The text does something new. It hesitates — you'd swear it hesitates — and then rewrites itself.
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Reconstructing prior identity...<br>Records fragmentary. Personal history degraded.<br>Confirm last known occupation.</div>
+
+The question lands in you like a hook, and what comes up on the line is not a word so much as a whole life: the smell of a workplace, the ache of a particular shift, the specific tiredness of the person you were about eleven hours ago.
+
+[[You worked the emergency room. Nights, mostly.->PastNurse]]
+[[You worked a kitchen line. Nights, always.->PastCook]]
+[[You worked security. Nights, by definition.->PastGuard]]
+
+:: PastNurse
+<<set $past to "nurse">>
+<<set $pastName to "ER nurse">>
+<<set $humanity to Math.min(100, $humanity + 2)>>
+An emergency room. Fourteen years of them. You know exactly how much blood a body can lose and keep its opinions, exactly where the carotid runs under a stranger's jaw, exactly what the monitor does in the four seconds before somebody's family stops being a family.
+
+You know, in other words, precisely what you are about to be capable of. There's no ignorance available to you here. Whatever you do tonight, you will understand the anatomy of it.
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Prior designation logged: <strong>CLINICAL</strong>.<br>Subject possesses working knowledge of human tolerances. Noted.</div>
+
+Your phone has four missed calls on it. All from JUNIE. Your sister has been calling since about the time you stopped having a pulse.
+
+[[Put the phone away. Deal with it later.->FirstPulse]]
+
+:: PastCook
+<<set $past to "cook">>
+<<set $pastName to "line cook">>
+<<set $hunger to Math.min(100, $hunger + 2)>>
+A kitchen line. Eleven years of standing in the same square metre of heat, hands scarred pale from a hundred small burns you stopped noticing by year two. You know this city's night shift from the inside — who's still open at three, who drinks after close, which bartenders will let a cook sit at the end of the bar and say nothing for an hour.
+
+You know how to work through exhaustion and appetite. Whether that's going to help you tonight is an open question.
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Prior designation logged: <strong>SERVICE</strong>.<br>Subject acclimatized to sustained physical demand. Noted.</div>
+
+Your phone has four missed calls on it. All from JUNIE. Your sister has been calling since about the time you stopped having a pulse.
+
+[[Put the phone away. Deal with it later.->FirstPulse]]
+
+:: PastGuard
+<<set $past to "guard">>
+<<set $pastName to "night security">>
+<<set $heat to Math.max(0, $heat - 2)>>
+Night security. Nine years of walking other people's empty buildings at hours when nothing should move. You know cameras — where they sit, where they don't, the four-second sweep and the blind corner every installer leaves without meaning to. You know the specific boredom of watching, and the specific alertness underneath it.
+
+You spent a decade being the person who notices. Tonight, for the first time, you are the thing worth noticing.
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Prior designation logged: <strong>OBSERVATIONAL</strong>.<br>Subject familiar with surveillance patterning. Noted.</div>
+
+Your phone has four missed calls on it. All from JUNIE. Your sister has been calling since about the time you stopped having a pulse.
+
+[[Put the phone away. Deal with it later.->FirstPulse]]
 
 :: FirstPulse
 You get your feet under you against a dumpster that gives a little too easily, like your grip is stronger than you remember it being. The hunger sharpens the second you're vertical, a wire pulled tight behind your teeth.
 
-<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Hunger: <strong>$hunger</strong>/100 — Humanity: <strong>$humanity</strong>/100 — Notoriety: <strong>$heat</strong>/100<br>No Disciplines known. No territory claimed. No allies.</div>
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Hunger: <strong>$hunger</strong>/100 — Humanity: <strong>$humanity</strong>/100 — Notoriety: <strong>$heat</strong>/100<br>No powers known. No territory claimed. No allies.</div>
 
 No sire. No coven. No idea what you are beyond the word that keeps surfacing in your skull like a bruise: <em>vampire</em>. Just a body that doesn't need to breathe, a hunger that won't quit, and this — thing — quietly narrating your descent.
 
@@ -111,9 +247,17 @@ One of them is close. Twenty feet, behind a stack of pallets, sitting down, brea
 [[Follow the sound.->TutorialAlley]]
 
 :: TutorialAlley
-He's maybe forty, suit jacket balled under his head as a pillow, an empty bottle standing sentinel by his shoe. He smells like whiskey and, underneath it, like something your new body has already decided is the only thing that matters in the world.
+He's maybe forty, suit jacket balled under his head as a pillow, an empty bottle standing sentinel by his shoe. There's a laminated work badge clipped to his belt: DENNY R., FACILITIES. He smells like whiskey and, underneath it, like something your new body has already decided is the only thing that matters in the world.
 
 The hunger doesn't ask permission. It just tells you, very clearly, what would happen if you knelt down and put your mouth against his throat.
+
+<<if $past == "nurse">>
+You find his pulse from four feet away out of pure habit — sixty-two, strong, a little slow from the drink. The number arrives before you can stop it, and with it the exact arithmetic of how much you could take before it became a problem for him.
+<<elseif $past == "cook">>
+You know this man's shift. Facilities, second job probably, the kind of tired that puts you on your back in an alley instead of in a cab. You've been that tired. You were that tired last night.
+<<else>>
+You clock the camera on the loading dock behind him — dead, lens fogged, the kind nobody's checked in a year. Nine years of noticing where the eyes aren't, and your body has already used it before your conscience gets a vote.
+<</if>>
 
 You have a choice in how you do this. You can already sense that much.
 
@@ -129,12 +273,12 @@ You have a choice in how you do this. You can already sense that much.
 :: TutorialFeedCareful
 <<set $hunger to Math.max(0, $hunger - 25)>>
 <<set $humanity to Math.min(100, $humanity + 2)>>
-<<set $heat to $heat + 2>>
+<<set $heat to Math.min(100, $heat + 2)>>
 <<set $carefulStreak to $carefulStreak + 1>>
 <<set $recklessCount to 0>>
 <<set $feedsCareful to $feedsCareful + 1>>
 <<set $tutorialDone to true>>
-You kneel, tilt his head aside like you've done it a thousand times, and drink in slow, measured pulls. You stop while his heart is still finding its rhythm again, not stuttering. You wipe your mouth. He'll wake up hungover and unnerved, with two small marks he'll blame on a bug bite, and no memory of you at all.
+You kneel, tilt his head aside like you've done it a thousand times, and drink in slow, measured pulls. You stop while his heart is still finding its rhythm again, not stuttering. You wipe your mouth. Denny will wake up hungover and unnerved, with two small marks he'll blame on a bug bite, and no memory of you at all.
 
 The hunger recedes to a dull, manageable ache instead of a scream. That matters. You can think again.
 
@@ -145,7 +289,7 @@ The hunger recedes to a dull, manageable ache instead of a scream. That matters.
 :: TutorialFeedReckless
 <<set $hunger to Math.max(0, $hunger - 45)>>
 <<set $humanity to Math.max(0, $humanity - 8)>>
-<<set $heat to $heat + 15>>
+<<set $heat to Math.min(100, $heat + 15)>>
 <<set $recklessCount to $recklessCount + 1>>
 <<set $carefulStreak to 0>>
 <<set $feedsReckless to $feedsReckless + 1>>
@@ -161,25 +305,26 @@ The hunger goes quiet all at once, gorged and satisfied, and the silence of it i
 [[Stand up. Look at the city properly for the first time.->TheCityHub]]
 
 :: TutorialResist
-You dig your nails into your own palms and make yourself stand, make yourself walk the other way, out toward the street. Whatever you are, you decide, it isn't going to be decided for you on the first night.
-
 <<set $hunger to Math.min(100, $hunger + 8)>>
 <<set $humanity to Math.min(100, $humanity + 1)>>
+<<set $feedsDeclined to $feedsDeclined + 1>>
+You dig your nails into your own palms and make yourself stand, make yourself walk the other way, out toward the street. Whatever you are, you decide, it isn't going to be decided for you on the first night, over a man asleep in an alley with his work badge still clipped on.
+
 It costs you. The hunger doesn't forgive resistance, it just files it away and gets louder. Your hands are shaking by the time you reach the sidewalk, and the heartbeat behind you in the alley suddenly sounds less like temptation and more like a countdown.
 
-<<if $hunger >= 90>>
+You make it four blocks. The city does its indifferent thing around you — a bus, a couple arguing outside a chicken shop, someone's dog — and every single one of them has a pulse, and you can hear all of them at once, and the sound is starting to arrange itself into something that isn't sound any more.
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Hunger: <strong>$hunger</strong>/100. Restraint logged.<br>Note: restraint is not a substitute for blood. The vessel does not accept it as one.</div>
+
 [[The countdown runs out.->FrenzyTutorial]]
-<<else>>
-[[Push forward into the city anyway.->TheCityHub]]
-<</if>>
 
 :: FrenzyTutorial
 <<set $hunger to 15>>
 <<set $humanity to Math.max(0, $humanity - 15)>>
-<<set $heat to $heat + 20>>
+<<set $heat to Math.min(100, $heat + 20)>>
 <<set $recklessCount to $recklessCount + 1>>
 <<set $tutorialDone to true>>
-The next clear thought you have, you're crouched over the man from the alley and he is not moving and there is a sound coming from you that you don't recognize as anything you've ever made before.
+The next clear thought you have, you're crouched over Denny and he is not moving and there is a sound coming from you that you don't recognize as anything you've ever made before.
 
 You don't remember crossing the distance. That's the worst part. There's a gap in you now where a choice should have been.
 
@@ -201,8 +346,22 @@ The hunger has stopped being a feeling and started being the only thing that exi
 You've been made. You feel it before you see them — the wrongness of a car idling too long, a jacket that doesn't fit the weather. Someone has been building a file on you, and tonight they close it.
 
 [[They close in.->HunterAmbush]]
+<<elseif $turn >= 6>>
+The sky over the east end has started doing the thing you have learned, in less than a week, to be afraid of — not light yet, just a thinning, the black going the colour of old iron.
+
+Whatever else you meant to do tonight, you are out of night to do it in.
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Interval closing. Solar exposure risk rising.<br>Remaining activity window: insufficient.</div>
+
+[[Find somewhere dark and let the day happen without you.->NightReflection]]
 <<else>>
+<<if $nightsPassed == 1>>
 The city goes on not caring about you, which after tonight feels like a small mercy. Streetlight, wet asphalt, a thousand heartbeats you're learning to filter out on purpose so you don't have to hear all of them at once.
+<<elseif $nightsPassed <= 3>>
+Night $nightsPassed. You're learning the rhythm of it — how the city empties in layers, which hours belong to whom, where a person can stand for twenty minutes without becoming a story someone tells later.
+<<else>>
+Night $nightsPassed. You move through the city now like something that lives here, and the ease of that is its own quiet indictment. Six days ago you had a commute.
+<</if>>
 
 <div class="sys-pulse"><strong>[ SYSTEM ]</strong> Hunger: <strong>$hunger</strong>/100 &nbsp;|&nbsp; Humanity: <strong>$humanity</strong>/100 &nbsp;|&nbsp; Notoriety: <strong>$heat</strong>/100</div>
 
@@ -211,6 +370,14 @@ Three parts of the city keep pulling at your attention, each for a different rea
 [[Head into Midtown Lights — bars, crowds, easy witnesses.->MidtownEntry]]
 [[Head down to The Docks — rougher, contested, and something's watching there too.->DocksEntry]]
 [[Head toward Ashgrove Hollow — the old cemetery quarter. Claimed ground.->HollowEntry]]
+<<if $nightsPassed >= 2 && !$junieCalled>>
+[[Your phone has been buzzing all night. It's Junie.->JunieCall]]
+<<elseif $metJunie && $nightsPassed >= 3>>
+[[Go see Junie again.->JunieMeet]]
+<</if>>
+<<if $courtSummoned && !$courtTaskDone>>
+[[The Hollow Court is waiting on an answer from you.->CourtTask]]
+<</if>>
 [[Find somewhere quiet to wait out the hours.->Rest]]
 [[Check what you've become so far.->CheckStatus]]
 <<if $turn >= 3>>
@@ -219,38 +386,54 @@ Three parts of the city keep pulling at your attention, each for a different rea
 <</if>>
 
 :: CheckStatus
-<div class="sys-pulse">
-<strong>[ SYSTEM — STATUS ]</strong><br>
-Hunger: <strong>$hunger</strong>/100<br>
-Humanity: <strong>$humanity</strong>/100<br>
-Notoriety: <strong>$heat</strong>/100
-</div>
+<div class="sys-pulse"><strong>[ SYSTEM — STATUS ]</strong> &nbsp;Night $nightsPassed<br>Hunger: <strong>$hunger</strong>/100 &nbsp;|&nbsp; Humanity: <strong>$humanity</strong>/100 &nbsp;|&nbsp; Notoriety: <strong>$heat</strong>/100<br>Prior life: $pastName</div>
 
 <<if $disciplines.length > 0>>
-''Disciplines known:''
-<<if $disciplines.includes("Obfuscate")>>
-- <strong>Obfuscate</strong> — fold into shadow and static memory; quieter feeding, cleaner exits.
+''What has surfaced in you:''
+<<if $stepTier > 0>>
+- <strong>Hollow Step</strong> (tier $stepTier) — attention slides off you; quieter feeding, cleaner exits.
 <</if>>
-<<if $disciplines.includes("Potence")>>
-- <strong>Potence</strong> — inhuman strength, bought with violence.
+<<if $strengthTier > 0>>
+- <strong>Grave Strength</strong> (tier $strengthTier) — inhuman force, bought with violence.
 <</if>>
-<<if $disciplines.includes("Auspex")>>
-- <strong>Auspex</strong> — heightened senses; you feel danger coming before it arrives.
+<<if $senseTier > 0>>
+- <strong>Wake-Sense</strong> (tier $senseTier) — you feel the shape of a night before it arrives.
+<</if>>
+<<if $voiceTier > 0>>
+- <strong>Still Voice</strong> (tier $voiceTier) — people stop, against their judgment, and listen.
+<</if>>
+<<if $memoryTier > 0>>
+- <strong>Blood Memory</strong> (tier $memoryTier) — blood carries the day it came from, and you can read it.
+<</if>>
+<<if $vigilTier > 0>>
+- <strong>Cold Vigil</strong> (tier $vigilTier) — damage has become weather rather than emergency.
 <</if>>
 <<else>>
-No Disciplines have surfaced yet. Whatever you become, it hasn't shown itself.
+Nothing has surfaced in you yet. Whatever you become, it hasn't shown itself.
 <</if>>
 
 ''Territory:''
+<<if $midtownClaim >= 2>>
+- Midtown Lights — <strong>yours</strong>. The block knows your footsteps and has decided not to mention them.
+<<elseif $midtownClaim == 1>>
+- Midtown Lights — contested. You've made a claim. Something else has noticed.
+<<else>>
 - Midtown Lights — unclaimed, populated, forgiving. <<if $visitedMidtown>>You know it now.<<else>>Unvisited.<</if>>
+<</if>>
 - The Docks — contested ground, rough prey, hunter rumors. <<if $visitedDocks>>You know it now.<<else>>Unvisited.<</if>>
-- Ashgrove Hollow — claimed by something older than you. <<if $visitedHollow>>You've trespassed there.<<else>>Unvisited.<</if>>
+- Ashgrove Hollow — held by the Hollow Court. <<if $visitedHollow>>You've walked it.<<else>>Unvisited.<</if>>
 
 ''People:''
-<<if $metMira>>- Mira, bartender, Midtown. Trust: $miraTrust<<else>>- No one in Midtown knows your name yet.<</if>>
-<<if $metKestrel>>- Kestrel, a Kindred loner, the Docks. Standing: $kestrelStanding<<else>>- No Kindred have found you yet — or admitted it.<</if>>
+<<if $metMira>>- Mira Castellan, bartender, Midtown. Trust: $miraTrust<<else>>- No one in Midtown knows your name yet.<</if>>
+<<if $metKestrel>>- Kestrel, a Kindred loner, the Docks. Standing: $kestrelStanding<</if>>
+<<if $metSable>>- Sable, fledgling, no sire. Standing: $sableStanding<</if>>
+<<if $metVoss>>- Voss, enforcer of the Hollow Court. Court standing: $courtStanding<</if>>
+<<if $metIlse>>- Provost Ilse Corven, who speaks for the Hollow Court.<</if>>
+<<if $metJunie>>- Junie. Your sister. Bond: $junieBond<<else>>- Junie has called you four times.<</if>>
+<<if $okaforAwareness > 0>>- Det. Adaeze Okafor, Major Crimes. Her file on you: $okaforAwareness<</if>>
 
 [[Back to the street.->TheCityHub]]
+[[About this game.->About]]
 
 :: Rest
 <<set $hunger to Math.min(100, $hunger + 10)>>
@@ -267,12 +450,26 @@ Lying low costs you nothing but a little more hunger and a little more patience.
 :: MidtownEntry
 <<set $visitedMidtown to true>>
 <<set $hunger to Math.min(100, $hunger + 3)>>
+<<if $midtownClaim >= 2>>
+Midtown Lights is doing what it always does at this hour, except that now it does it around you. You've fed here carefully enough, often enough, that the block has developed a habit of not looking directly at you — bouncers nodding you past, a cab slowing without being waved at. This is what claimed ground feels like from the inside. It feels like being furniture that everyone is slightly afraid of.
+<<else>>
 Midtown Lights is doing what it always does at this hour: bleeding neon onto wet pavement, feeding music out of open bar doors, filling its sidewalks with people who are drunk enough not to notice a stranger's too-quiet footsteps. Easy hunting. Easy witnesses too, if you're careless.
+<</if>>
 
 [[There's a bar on the corner with its lights still on — Mira's.->MidtownBar]]
 [[Walk the alleys behind the bars instead — quieter prey.->MidtownAlleyHunt]]
 <<if $heat >= 30>>
 [[Someone on the corner is talking too loud about something they saw.->MidtownWitnessEvent]]
+<</if>>
+<<if $nightsPassed >= 2 && !$metSable>>
+[[Someone else is hunting this block tonight. You can feel them.->SableFirstMeet]]
+<<elseif $metSable && !$sableResolved && $nightsPassed >= 3>>
+[[Sable is working your block again.->SableConfront]]
+<</if>>
+<<if $nightsPassed >= 3 && $midtownClaim == 0 && $miraTrust >= 3>>
+[[Stand still a moment and consider what it would mean to call this block yours.->MidtownClaimStart]]
+<<elseif $midtownClaim == 1>>
+[[Your claim on this block is being tested.->MidtownClaimContest]]
 <</if>>
 [[Head back to the hub.->TheCityHub]]
 
@@ -281,6 +478,9 @@ Midtown Lights is doing what it always does at this hour: bleeding neon onto wet
 Mira's behind the bar again, rag in hand, radio low. She looks up when the door chimes and — for a second — she doesn't look afraid, which after everything you've done is its own strange gift.
 
 [[Sit down and talk to her.->MiraTalk]]
+<<if $miraTrust >= 5 && $nightsPassed >= 3>>
+[[She's been wanting to tell you something. Let her.->MiraWarning]]
+<</if>>
 <<if $miraTrust <= -3>>
 [[She's alone later. The hunger notices.->MiraFirstMeet]]
 <<else>>
@@ -293,7 +493,11 @@ The bar is nearly empty — a couple of regulars fossilized on their stools, a r
 
 She catches you staring and, instead of looking away, gives you a small, exhausted smile. "Rough night?"
 
+<<if $past == "cook">>
+You know this bar. You've sat at the end of it after close more times than you can count, still smelling like the fryer, and she has poured you exactly one drink and left you alone with it exactly the way you needed. She doesn't recognize you. You're not sure what that means yet.
+<<else>>
 You have no idea how to answer that honestly.
+<</if>>
 
 [[Sit down and talk to her.->MiraTalk]]
 [[Say nothing. Wait for her to be alone. The hunger is patient tonight.->MiraFirstMeet]]
@@ -301,16 +505,79 @@ You have no idea how to answer that honestly.
 <</if>>
 
 :: MiraTalk
+<<if $miraTrust < 8>>
 <<set $miraTrust to $miraTrust + 2>>
 <<set $humanity to Math.min(100, $humanity + 1)>>
 You order something you have no intention of drinking and let her talk — about the regulars, about the landlord, about a sister in Ohio she hasn't called back. It costs you nothing but time, and it does something you don't expect: it makes you feel, for the length of the conversation, like a person having a conversation, instead of a hunger wearing one.
 
-She doesn't know what you are. She just knows you listen. That's rarer than she thinks.
+She tells you her last name is Castellan, like it's a joke she's tired of. She doesn't know what you are. She just knows you listen. That's rarer than she thinks.
+<<else>>
+You sit at the end of the bar and she talks and you listen, and it's good, and it is also — you notice this and dislike noticing it — a thing you have started doing on purpose, the way you'd maintain a tool.
+
+Mira has told you everything there is to tell about the landlord and the regulars and the sister in Ohio. There's nothing left here to build. What's between you now either holds under weight or it doesn't, and sitting on this stool for another hour won't settle which.
+<</if>>
 
 <<include "SystemCheck">>
 
+<<if $miraTrust < 8>>
 [[Stay a while longer.->MidtownBar]]
+<</if>>
 [[Head back to the hub.->TheCityHub]]
+
+:: MiraWarning
+<<set $miraTrust to $miraTrust + 1>>
+<<set $okaforAwareness to $okaforAwareness + 1>>
+She waits until the last regular is out the door, then leans on the counter with both forearms, the way people do when they've been rehearsing something for a week.
+
+"A cop came in," she says. "Woman, Major Crimes, showed me a — not a photo. A drawing. Composite. Asked if anybody's been coming in regular who doesn't drink." Mira looks at you steadily. "I said no."
+
+The radio fills the silence badly.
+
+"I'm not asking," she says. "I want to be really clear that I'm not asking. I just want you to know I didn't answer her, and I'd like to keep not answering her, and I need you to not make that a stupid decision on my part."
+
+<<if $memoryTier > 0>>
+You can taste her fear from three feet away, and underneath it — this is the part that undoes you — something protective. She's frightened <em>for</em> you, and she can't articulate why, and she's doing it anyway.
+<</if>>
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> A mortal has chosen, without information, to shield you.<br>The System has no field for this. Recording it anyway.</div>
+
+<<include "SystemCheck">>
+
+[[Tell her the truth. All of it.->MiraTruth]]
+[[Tell her to stop protecting you and mean it.->MiraPushAway]]
+[[Say nothing useful. Let her keep guessing.->MidtownBar]]
+
+:: MiraTruth
+<<set $miraTrust to $miraTrust + 4>>
+<<set $humanity to Math.min(100, $humanity + 5)>>
+<<set $talkedDown to $talkedDown + 1>>
+You tell her. Not cleanly — there's no clean version — but you tell her what happened in the alley and what you've been doing since and what you have already done to people in this neighbourhood, and you do not soften the parts that make you the monster in the story.
+
+Mira listens with her jaw set and her hands flat on the bar. When you finish she is quiet for a long thirty seconds.
+
+"Okay," she says. Then: "Okay." Then, after a moment: "You could have lied. You've had a month of chances to lie to me and you took none of them, and I'm choosing to think that means something."
+
+She pushes a glass of water across the bar at you, which is the single most human gesture anyone has made toward you since you died, and neither of you mentions that you can't drink it.
+
+<<include "SystemCheck">>
+
+[[Stay until close.->MidtownBar]]
+[[Leave before you cost her anything else.->TheCityHub]]
+
+:: MiraPushAway
+<<set $miraTrust to Math.max(-6, $miraTrust - 3)>>
+<<set $humanity to Math.max(0, $humanity - 2)>>
+"Answer her," you say. "Next time she comes in, answer everything. Describe me accurately. Don't leave anything out."
+
+Mira's face does something complicated. "That's not—"
+
+"It's not a favour to me," you say, and you make yourself hold her eyes while you say it. "Whatever you think you're protecting, it isn't worth the thing it's going to cost you."
+
+You leave before she can build an argument. It's the kindest thing you've done all week and it feels identical to cruelty from the inside, and you spend the walk to the corner trying and failing to find the difference.
+
+<<include "SystemCheck">>
+
+[[Keep walking.->TheCityHub]]
 
 :: MiraFirstMeet
 Closing time comes, the regulars stagger out, and Mira locks the door behind the last of them, alone now, counting the register down under a buzzing light. You could be inside before she even registers the sound of the lock failing to catch.
@@ -331,7 +598,8 @@ There's a version of this where you never do this to her at all.
 :: MiraFeedCareful
 <<set $hunger to Math.max(0, $hunger - 28)>>
 <<set $humanity to Math.min(100, $humanity + 1)>>
-<<set $heat to $heat + 2>>
+<<set $heat to Math.min(100, $heat + 2)>>
+<<if $midtownClaim >= 2>><<set $heat to Math.max(0, $heat - 1)>><</if>>
 <<set $carefulStreak to $carefulStreak + 1>>
 <<set $recklessCount to 0>>
 <<set $miraTrust to $miraTrust + 3>>
@@ -347,7 +615,7 @@ She'll wake up in twenty minutes, disoriented, blaming low blood sugar and a dou
 :: MiraFeedReckless
 <<set $hunger to Math.max(0, $hunger - 48)>>
 <<set $humanity to Math.max(0, $humanity - 10)>>
-<<set $heat to $heat + 18>>
+<<set $heat to Math.min(100, $heat + 18)>>
 <<set $recklessCount to $recklessCount + 1>>
 <<set $carefulStreak to 0>>
 <<set $miraTrust to $miraTrust - 6>>
@@ -366,11 +634,83 @@ She survives. She will also never again feel safe in a room with a quiet strange
 <<set $hunger to Math.min(100, $hunger + 4)>>
 <<set $humanity to Math.min(100, $humanity + 3)>>
 <<set $miraTrust to $miraTrust + 1>>
+<<set $feedsDeclined to $feedsDeclined + 1>>
 You watch her lock the register, hum along badly to the radio, flip the sign to CLOSED — and you turn around and walk back out into the street with the hunger gnawing, unfed, unresolved. It's not nothing, choosing this. It doesn't fill you up. It doesn't have to, to matter.
 
 <<include "SystemCheck">>
 
 [[Head back to the hub.->TheCityHub]]
+
+:: MidtownClaimStart
+<<set $midtownClaim to 1>>
+<<set $heat to Math.min(100, $heat + 4)>>
+You stop under the awning outside Mira's and actually look at the block — not for prey, for the first time, but as a shape. Four bars, two late kitchens, a parking structure, an alley system you now know better than the people who take out its trash. You've been careful here. People half-know you here. That is not nothing; that is the raw material of a claim.
+
+You don't announce it. There's nobody to announce it to. You just start walking the perimeter like it's yours, and something in the way you carry yourself changes enough that a bouncer three doors down straightens up as you pass and doesn't know why he did.
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Territorial claim initiated: <strong>Midtown Lights</strong> — contested.<br>Claims are not granted. They are noticed, and then they are tested.</div>
+
+<<include "SystemCheck">>
+
+[[Walk the perimeter.->MidtownEntry]]
+
+:: MidtownClaimContest
+The test comes the way Kestrel would have told you it would, if you'd asked: not as a challenge but as an encroachment. Somebody has fed on your block, sloppily, twice in three nights, and left the kind of mess that brings uniforms and questions to a neighbourhood you have spent a week keeping quiet.
+
+<<if $metSable>>
+You know exactly who. There's only one other new thing hunting Midtown, and it isn't subtle.
+<<else>>
+You don't know who yet. You know the shape of them: fast, hungry, careless in a way you recognize from your own first night.
+<</if>>
+
+<<include "SystemCheck">>
+
+[[Hold the block. Clean up after them and make the claim stick the slow way.->MidtownClaimHold]]
+[[Hold the block the fast way. Find them and make it unmistakable.->MidtownClaimForce]]
+[[Let it go. A claim isn't worth what holding it costs.->MidtownClaimAbandon]]
+
+:: MidtownClaimHold
+<<set $midtownClaim to 2>>
+<<set $heat to Math.max(0, $heat - 8)>>
+<<set $humanity to Math.min(100, $humanity + 2)>>
+<<set $carefulStreak to $carefulStreak + 1>>
+You spend three nights being a janitor instead of a predator. You find the woman they left in the stairwell and you call it in from a payphone that shouldn't still exist. You steer a stumbling witness two blocks the wrong way. You feed so carefully during those nights that the hunger becomes a permanent low note you simply learn to live under.
+
+It works. Not dramatically — that's the point. The block gets quiet again, the patrol car stops idling on the corner, and the neighbourhood settles back into a rhythm that now has you in it.
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Territory claimed: <strong>Midtown Lights</strong>.<br>Feeding here now draws less attention. Attention drawn elsewhere still finds its way home.</div>
+
+<<include "SystemCheck">>
+
+[[This is yours now.->MidtownEntry]]
+
+:: MidtownClaimForce
+<<set $midtownClaim to 2>>
+<<set $heat to Math.min(100, $heat + 12)>>
+<<set $humanity to Math.max(0, $humanity - 6)>>
+<<set $recklessCount to $recklessCount + 1>>
+<<set $scars to $scars + 1>>
+You find them on the fire escape behind the Vietnamese place at four in the morning, and you do not open with a conversation. It's brief and it's ugly and you put them through a railing that was structurally more honest than they were.
+
+They go. The block is unmistakably yours by dawn. It is also, by dawn, a block where two separate people have now called in a disturbance involving figures on a roof, and the patrol car on the corner has become a patrol car that parks there on purpose.
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Territory claimed: <strong>Midtown Lights</strong>.<br>Method logged. Territory holds. Notoriety holds too.</div>
+
+<<include "SystemCheck">>
+
+[[This is yours now.->MidtownEntry]]
+
+:: MidtownClaimAbandon
+<<set $midtownClaim to 0>>
+<<set $heat to Math.max(0, $heat - 4)>>
+<<set $humanity to Math.min(100, $humanity + 1)>>
+You think about what holding this block actually requires — the patrols, the cleanup, the willingness to hurt whoever tests it next, and the certainty that someone will always test it next — and you decide that the version of you that wants a territory is a version you're not obligated to become yet.
+
+You let the claim go. The block does not notice. Blocks never do.
+
+<<include "SystemCheck">>
+
+[[Back to the street.->MidtownEntry]]
 
 :: MidtownAlleyHunt
 The alleys behind the strip run parallel to the noise, dark enough that nobody looks twice at another shape in the shadows. Two heartbeats present themselves within a block of each other: a reveler peeling off from a bachelorette party, swaying and singing to herself, and a stockroom worker finishing a late shift, keys already out, walking fast toward a car with a child seat visible in the back.
@@ -382,7 +722,9 @@ The alleys behind the strip run parallel to the noise, dark enough that nobody l
 [[Neither. Head back to the hub.->TheCityHub]]
 
 :: HuntDrunkReveler
-She's easy to catch up to, easy to steer into a doorway on the pretext of helping her stand. She's so far gone she barely registers what's happening, laughing softly even as your teeth find her throat, like this is just one more strange thing that happened to her tonight that she won't clearly remember tomorrow.
+She's easy to catch up to, easy to steer into a doorway on the pretext of helping her stand. Her friends have already turned the corner. Her phone lock screen is a photo of a dog, and her name — you get this off a bar tab still crumpled in her fist — is Cass.
+
+She's so far gone she barely registers what's happening, laughing softly even as your teeth find her throat, like this is just one more strange thing that happened to her tonight that she won't clearly remember tomorrow.
 
 [[Take a careful pull and set her down safely.->AlleyRevelerCareful]]
 [[Take more than you should. She's drunk — she won't remember the details anyway.->AlleyRevelerReckless]]
@@ -390,11 +732,12 @@ She's easy to catch up to, easy to steer into a doorway on the pretext of helpin
 :: AlleyRevelerCareful
 <<set $hunger to Math.max(0, $hunger - 24)>>
 <<set $humanity to Math.min(100, $humanity + 2)>>
-<<set $heat to $heat + 2>>
+<<set $heat to Math.min(100, $heat + 2)>>
+<<if $midtownClaim >= 2>><<set $heat to Math.max(0, $heat - 1)>><</if>>
 <<set $carefulStreak to $carefulStreak + 1>>
 <<set $recklessCount to 0>>
 <<set $feedsCareful to $feedsCareful + 1>>
-You take just enough, prop her against the doorway with her purse still on her shoulder, and by the time you're gone she's already forgetting why she sat down. Tomorrow this is a blackout story she tells her friends, not a police report.
+You take just enough, prop Cass against the doorway with her purse still on her shoulder, and text her friends from her own phone before you go: <em>outside, come get me</em>. By the time you're gone she's already forgetting why she sat down. Tomorrow this is a blackout story she tells badly at brunch, not a police report.
 
 <<include "SystemCheck">>
 
@@ -403,20 +746,24 @@ You take just enough, prop her against the doorway with her purse still on her s
 :: AlleyRevelerReckless
 <<set $hunger to Math.max(0, $hunger - 40)>>
 <<set $humanity to Math.max(0, $humanity - 6)>>
-<<set $heat to $heat + 10>>
+<<set $heat to Math.min(100, $heat + 10)>>
 <<set $recklessCount to $recklessCount + 1>>
 <<set $carefulStreak to 0>>
 <<set $feedsReckless to $feedsReckless + 1>>
-You let yourself have more than you need, reasoning — while some quieter part of you keeps count of the reasoning — that no one will believe her account of the night even if she remembers it. She's pale and shaking when you leave her sitting against the doorway, and a passerby is already crouching next to her before you've made it to the end of the block.
+You let yourself have more than you need, reasoning — while some quieter part of you keeps count of the reasoning — that no one will believe Cass's account of the night even if she remembers it. She's pale and shaking when you leave her sitting against the doorway, and a passerby is already crouching next to her before you've made it to the end of the block.
 
 <<include "SystemCheck">>
 
 [[Get clear of the block.->TheCityHub]]
 
 :: HuntLateShiftWorker
-He's got his keys laced through his fingers already, the small defensive habit of someone who's read the pamphlets about parking lots at night, and he clocks you approaching a half-second before you're on him — fast enough to almost matter, not fast enough to matter at all.
+He's got his keys laced through his fingers already, the small defensive habit of someone who's read the pamphlets about parking lots at night, and he clocks you approaching a half-second before you're on him — fast enough to almost matter, not fast enough to matter at all. His lanyard says RUBEN O.
 
 There's a photo on his keychain. A kid, maybe six, gap-toothed, grinning at whoever held the camera.
+
+<<if $past == "nurse">>
+You have discharged this man four hundred times. Different face, same lanyard, same second job, same kid on the same keychain, sitting in your waiting room at 2 a.m. with something that could have been treated a week ago.
+<</if>>
 
 <<include "SystemCheck">>
 
@@ -427,11 +774,12 @@ There's a photo on his keychain. A kid, maybe six, gap-toothed, grinning at whoe
 :: WorkerFeedCareful
 <<set $hunger to Math.max(0, $hunger - 30)>>
 <<set $humanity to Math.min(100, $humanity + 1)>>
-<<set $heat to $heat + 3>>
+<<set $heat to Math.min(100, $heat + 3)>>
+<<if $midtownClaim >= 2>><<set $heat to Math.max(0, $heat - 2)>><</if>>
 <<set $carefulStreak to $carefulStreak + 1>>
 <<set $recklessCount to 0>>
 <<set $feedsCareful to $feedsCareful + 1>>
-You make yourself slow down, make yourself stop while his hands are still steady enough to find his keys again. He sits in his car for ten minutes afterward, forehead on the wheel, chalking the dizziness up to exhaustion, and then he drives home to the kid in the photo, alive and unaware of how close a thing tonight actually was.
+You make yourself slow down, make yourself stop while his hands are still steady enough to find his keys again. Ruben sits in his car for ten minutes afterward, forehead on the wheel, chalking the dizziness up to exhaustion, and then he drives home to the kid in the photo, alive and unaware of how close a thing tonight actually was.
 
 <<include "SystemCheck">>
 
@@ -440,11 +788,11 @@ You make yourself slow down, make yourself stop while his hands are still steady
 :: WorkerFeedReckless
 <<set $hunger to Math.max(0, $hunger - 50)>>
 <<set $humanity to Math.max(0, $humanity - 14)>>
-<<set $heat to $heat + 16>>
+<<set $heat to Math.min(100, $heat + 16)>>
 <<set $recklessCount to $recklessCount + 1>>
 <<set $carefulStreak to 0>>
 <<set $feedsReckless to $feedsReckless + 1>>
-You don't stop at what you need. You stop when your body decides it's had enough, and by then he's unconscious in the driver's seat, breathing but far too slow, and the photo on his keychain is somehow the only thing in the entire scene you can't stop looking at.
+You don't stop at what you need. You stop when your body decides it's had enough, and by then Ruben is unconscious in the driver's seat, breathing but far too slow, and the photo on his keychain is somehow the only thing in the entire scene you can't stop looking at.
 
 You leave him there. You tell yourself he'll be found. You don't stay to check.
 
@@ -455,19 +803,38 @@ You leave him there. You tell yourself he'll be found. You don't stay to check.
 :: WorkerDecline
 <<set $hunger to Math.min(100, $hunger + 3)>>
 <<set $humanity to Math.min(100, $humanity + 4)>>
-You let him go. He drives off none the wiser, and you stand alone in the lot with the hunger complaining loudly about a meal you chose not to have, for reasons the System has no field to record.
+<<set $feedsDeclined to $feedsDeclined + 1>>
+You let him go. Ruben drives off none the wiser, and you stand alone in the lot with the hunger complaining loudly about a meal you chose not to have, for reasons the System has no field to record.
 
 <<include "SystemCheck">>
 
 [[Head back to the hub.->TheCityHub]]
 
 :: MidtownWitnessEvent
-<<set $heat to $heat + 8>>
+<<set $heat to Math.min(100, $heat + 8)>>
+<<set $okaforAwareness to $okaforAwareness + 1>>
 Someone on the street corner is on their phone, voice pitched high and scared, describing "a person, I don't know, they moved wrong" to whoever's on the other end. They're not looking at you. Not yet. But the description isn't wrong, and it isn't going nowhere.
+
+<<if $voiceTier > 0>>
+You could stop this. You've got the voice for it now — a few words, low and level, and this person would forget why they were frightened.
+[[Use it. Talk them down off their own fear.->WitnessTalkDown]]
+<</if>>
 
 <<include "SystemCheck">>
 
 [[Get off the street before they look up.->TheCityHub]]
+
+:: WitnessTalkDown
+<<set $heat to Math.max(0, $heat - 10)>>
+<<set $talkedDown to $talkedDown + 1>>
+<<set $humanity to Math.min(100, $humanity + 1)>>
+You step into their line of sight, slowly, hands visible, and say something so aggressively ordinary about the weather that their whole nervous system stalls trying to reconcile it. Then you keep talking. Nothing hypnotic, nothing forced — just a steady, boring, human voice, holding steady long enough that the fear has nowhere to stand.
+
+By the end of it they're apologizing to the operator. Long night. Thought they saw something. Never mind.
+
+<<include "SystemCheck">>
+
+[[Walk away while it's still true.->TheCityHub]]
 
 :: DocksEntry
 <<set $visitedDocks to true>>
@@ -485,33 +852,51 @@ Someone is sitting very still on a container rail up ahead, watching the black w
 <<if $heat >= 35>>
 [[Something's wrong here tonight — the air feels watched.->DocksHunterSign]]
 <</if>>
+<<if $okaforMet && $okaforAwareness >= 3 && $nightsPassed >= 3>>
+[[The unmarked sedan is back. This time she's alone, and she's waiting for you.->OkaforInterview]]
+<</if>>
 [[Head back to the hub.->TheCityHub]]
 
 :: DocksKestrelMeet
+<<if $metKestrel>>
+Kestrel hasn't moved from the rail. You're starting to suspect they don't, much.
+<<else>>
 <<set $metKestrel to true>>
 Up close, Kestrel doesn't look dangerous so much as tired in a way that's lasted centuries, not years — sunken eyes, an old coat, hands folded like they're used to waiting. They don't turn to look at you, but they speak anyway, like they clocked you the moment you crossed into the Docks.
 
 "New," they say. Not a question. "No sire worth the name, or you wouldn't be wandering around out here broadcasting like a lighthouse. What do you want, fledgling?"
+<</if>>
 
 [[Ask them what you are — really ask.->KestrelAskHelp]]
 [[Demand answers. You're done being confused.->KestrelThreaten]]
 [[Say nothing. Just listen.->KestrelListen]]
+<<if $kestrelStanding >= 3 && $nightsPassed >= 2>>
+[[Ask them to actually teach you something.->KestrelLesson2]]
+<</if>>
+<<if $kestrelStanding >= 6 && $nightsPassed >= 4>>
+[[Ask them the question you've been circling all week.->KestrelLesson3]]
+<</if>>
+[[Leave them to the water.->DocksEntry]]
 
 :: KestrelAskHelp
+<<if $kestrelStanding < 6>>
 <<set $kestrelStanding to $kestrelStanding + 1>>
 <<set $humanity to Math.min(100, $humanity + 1)>>
+<</if>>
 "What am I," you say, and it comes out smaller than you meant it to.
 
 Kestrel almost smiles. "Hungry. Dangerous. Unclaimed, which around here is the same thing as unprotected. Beyond that — depends what you do next. The System you're carrying isn't wisdom, it's just bookkeeping. It'll tell you what happened. It won't tell you what to be." They finally look at you. "That part's still yours. For now."
 
 <<include "SystemCheck">>
 
+<<if $kestrelStanding < 6>>
 [[Ask what "for now" means.->DocksKestrelMeet]]
+<</if>>
 [[Thank them and step back.->DocksEntry]]
 
 :: KestrelThreaten
 <<set $kestrelStanding to $kestrelStanding - 3>>
-<<set $heat to $heat + 4>>
+<<set $heat to Math.min(100, $heat + 4)>>
 You take a step closer, some new and ugly confidence telling you that whatever you are now, you're strong enough to make demands of an old thing sitting alone on a dock at night.
 
 Kestrel doesn't flinch, doesn't rise, just finally turns their head enough that you feel — physically feel, like a hand closing slow around your throat from the inside — exactly how much stronger they are than you. "Careful," is all they say. The pressure lifts as suddenly as it came. "I don't answer to threats from things that haven't survived a week yet. Ask nicely next time, or don't ask at all."
@@ -521,18 +906,70 @@ Kestrel doesn't flinch, doesn't rise, just finally turns their head enough that 
 [[Back off.->DocksEntry]]
 
 :: KestrelListen
+<<if $kestrelStanding < 6>>
 <<set $kestrelStanding to $kestrelStanding + 2>>
 You say nothing. You just stay, and listen, and let the silence stretch long enough that Kestrel eventually fills it on their own terms instead of yours — which, you're beginning to understand, is the only way anyone this old ever really tells you anything.
 
-"Feed like you have a choice, every time, even the times you don't," they say, eyes back on the water. "That's the whole discipline, before it's a Discipline. Everyone who lasts learns that part first. Everyone who doesn't, doesn't."
+"Feed like you have a choice, every time, even the times you don't," they say, eyes back on the water. "That's the whole discipline, before it's a power. Everyone who lasts learns that part first. Everyone who doesn't, doesn't."
+<<else>>
+You sit and you listen, and Kestrel lets the silence run, and this time they don't fill it.
+
+"You've got the trick of this now," they say eventually, without turning. "Sitting quiet with an old thing until it talks. It works. It has worked on me, repeatedly, and I've let it." A long pause, water on pilings. "But you're not going to get anything further out of me by waiting, fledgling. Past a point, listening stops being how you learn and starts being how you avoid deciding. Go and do something I can have an opinion about."
+<</if>>
 
 <<include "SystemCheck">>
 
+<<if $kestrelStanding < 6>>
 [[Sit with that a while longer.->DocksKestrelMeet]]
+<</if>>
 [[Head back into the Docks.->DocksEntry]]
+
+:: KestrelLesson2
+<<set $kestrelStanding to $kestrelStanding + 2>>
+<<set $humanity to Math.min(100, $humanity + 2)>>
+"Teach me something," you say. "Not a warning. Something I can use."
+
+Kestrel is quiet long enough that you think they've decided not to. Then they slide off the rail — the first time you've seen them move — and walk you three containers down to where a night crew is loading, and they make you stand there and just watch.
+
+"Count them," they say.
+
+Six workers. You count six.
+
+"Count again."
+
+Eight. There's a man on a break behind the forklift and a woman up in the cab you'd both filed as scenery. Kestrel lets that land.
+
+"Your hunger edits the world down to what it can eat," they say. "Everything else goes grey. That's not a moral failing, it's an optical one, and it is exactly how your kind gets caught — you stop seeing the two people who aren't food and one of them has a phone." They start back toward the rail. "Learn to count twice. It's the only lesson I've got that's ever kept anybody alive."
+
+<<include "SystemCheck">>
+
+[[Count twice from now on.->DocksKestrelMeet]]
+
+:: KestrelLesson3
+<<set $kestrelStanding to $kestrelStanding + 3>>
+<<set $humanity to Math.min(100, $humanity + 2)>>
+"Why are you helping me," you say. "You don't do this. I've asked around enough to know you don't do this."
+
+Kestrel looks at you for a long moment, and for the first time since you met them, something in their face is unguarded.
+
+"I had a childe," they say. "Once. I taught her nothing, because nobody taught me anything, and I had decided that was how it was done." A pause the length of a held breath. "She lasted eleven months. The Court took her apart in a basement in Ashgrove over a territorial question that a competent sire would have settled with one conversation."
+
+The water goes on slapping the pilings.
+
+"You're not her," they say. "You're not a replacement for her, and I'd thank you not to try to be. But you turned up unclaimed and broadcasting, and I found that I could not do nothing twice."
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Relationship threshold: <strong>KESTREL</strong>.<br>An unclaimed fledgling now has something functionally indistinguishable from a sire.</div>
+
+<<include "SystemCheck">>
+
+[[Say the only true thing you can think of: thank you.->DocksKestrelMeet]]
 
 :: DocksHunt
 Dockworkers finishing overnight loads, a couple of figures who look like they're moving something nobody filed paperwork for, a security guard doing rounds with a flashlight and no real conviction — the Docks offer rougher prey than Midtown, people less likely to be believed if they report something, but also less predictable, some of them armed, all of them used to watching their backs.
+
+<<if $past == "guard">>
+You know the guard's route before he walks it. You <em>wrote</em> a route like that, once, for a warehouse two piers over: clockwise, four stops, sign the sheet at each one, and the long blind stretch between stops two and three where nobody has ever once been fired for taking a phone break.
+<</if>>
 
 <<include "SystemCheck">>
 
@@ -543,11 +980,13 @@ Dockworkers finishing overnight loads, a couple of figures who look like they're
 :: DocksHuntCareful
 <<set $hunger to Math.max(0, $hunger - 27)>>
 <<set $humanity to Math.min(100, $humanity + 1)>>
-<<set $heat to $heat + 3>>
+<<set $heat to Math.min(100, $heat + 3)>>
 <<set $carefulStreak to $carefulStreak + 1>>
 <<set $recklessCount to 0>>
 <<set $feedsCareful to $feedsCareful + 1>>
-You time his second lap, catch him in the gap between two containers where the cameras don't reach, and take exactly what the hunger needs and not one pull more. He clocks back in at the end of his shift with a headache he blames on the energy drinks, and no one ever asks him a single question about it.
+You time his second lap, catch him in the gap between two containers where the cameras don't reach, and take exactly what the hunger needs and not one pull more. His radio crackles once while you're doing it and you wait, patient, for dispatch to lose interest.
+
+Amos clocks out at the end of his shift with a headache he blames on the energy drinks, and no one ever asks him a single question about it.
 
 <<include "SystemCheck">>
 
@@ -556,12 +995,14 @@ You time his second lap, catch him in the gap between two containers where the c
 :: DocksHuntReckless
 <<set $hunger to Math.max(0, $hunger - 42)>>
 <<set $humanity to Math.max(0, $humanity - 7)>>
-<<set $heat to $heat + 12>>
+<<set $heat to Math.min(100, $heat + 12)>>
 <<set $okaforAwareness to $okaforAwareness + 1>>
 <<set $recklessCount to $recklessCount + 1>>
 <<set $carefulStreak to 0>>
 <<set $feedsReckless to $feedsReckless + 1>>
-You reason, going in, that a smuggler is nobody's idea of a sympathetic victim. You don't reason your way back out again until he's on the ground and his two associates are already shouting into radios about "the thing" that just took their friend apart. Nobody official comes for this. Something worse might: this crew has its own reasons not to want unexplained bodies drawing attention to their shipments, and now they have a reason to go looking for you specifically.
+You reason, going in, that a smuggler is nobody's idea of a sympathetic victim. You don't reason your way back out again until Pike is on the ground and his two associates are already shouting into radios about "the thing" that just took their friend apart.
+
+Nobody official comes for this. Something worse might: this crew has its own reasons not to want unexplained bodies drawing attention to their shipments, and now they have a reason to go looking for you specifically.
 
 <<include "SystemCheck">>
 
@@ -573,8 +1014,8 @@ Chalk marks on a container that aren't graffiti. A parked sedan with two people 
 
 Somebody official is already asking questions about "the bloodless ones" — and the Docks, apparently, is where they've started asking.
 
-<<if $disciplines.includes("Auspex")>>
-Auspex hums low under your skin, a warning-before-the-warning: that sedan's engine just changed pitch. They're about to move.
+<<if $senseTier > 0>>
+Wake-Sense hums low under your skin, a warning-before-the-warning: that sedan's engine just changed pitch. They're about to move.
 [[Get clear before they do.->DocksEntry]]
 <<else>>
 [[Get clear while you still can.->DocksEntry]]
@@ -582,21 +1023,22 @@ Auspex hums low under your skin, a warning-before-the-warning: that sedan's engi
 [[Approach the sedan. See what they know.->DocksHunterEncounter]]
 
 :: DocksHunterEncounter
-<<set $heat to $heat + 10>>
+<<set $heat to Math.min(100, $heat + 10)>>
 <<set $okaforAwareness to $okaforAwareness + 2>>
+<<set $okaforMet to true>>
 The window rolls down before you're within ten feet. The woman behind the wheel has the particular stillness of someone who has already decided you're not a person she needs to be polite to. "Detective Okafor," she says, badge held low, almost bored. "You want to explain why you just walked up to an unmarked car at one in the morning instead of walking the other way like literally everyone else does?"
 
 Her partner's hand hasn't moved from somewhere below the dash.
 
-<<if $disciplines.includes("Obfuscate")>>
-[[Let Obfuscate blur their memory of your face and slip away.->HunterEvadeObfuscate]]
+<<if $stepTier > 0>>
+[[Let Hollow Step blur their memory of your face and slip away.->HunterEvadeStep]]
 <</if>>
 [[Talk your way out. Ordinary. Boring. Nothing to see.->HunterEvadeTalk]]
 [[Run.->HunterEvadeRun]]
 
-:: HunterEvadeObfuscate
+:: HunterEvadeStep
 <<set $heat to Math.max(0, $heat - 20)>>
-You let the discipline do what it's built for — not invisibility, just wrongness, a face that slides off memory the second attention moves away from it. Okafor blinks, frowns, says something about how she thought there'd been someone there, and by the time her partner looks up you're three containers away and gaining distance.
+You let the power do what it's built for — not invisibility, just wrongness, a face that slides off memory the second attention moves away from it. Okafor blinks, frowns, says something about how she thought there'd been someone there, and by the time her partner looks up you're three containers away and gaining distance.
 
 <<include "SystemCheck">>
 
@@ -605,6 +1047,7 @@ You let the discipline do what it's built for — not invisibility, just wrongne
 :: HunterEvadeTalk
 <<set $heat to Math.max(0, $heat - 8)>>
 <<set $humanity to Math.min(100, $humanity + 1)>>
+<<set $talkedDown to $talkedDown + 1>>
 You put your hands where she can see them, mumble something about a shortcut and insomnia, and lean hard into looking like exactly the kind of harmless that gets waved off at one in the morning. It mostly works. She lets you go with a look that says she's filing your face away regardless, badge or no badge.
 
 <<include "SystemCheck">>
@@ -612,7 +1055,7 @@ You put your hands where she can see them, mumble something about a shortcut and
 [[Walk away slowly. Don't run.->DocksEntry]]
 
 :: HunterEvadeRun
-<<set $heat to $heat + 15>>
+<<set $heat to Math.min(100, $heat + 15)>>
 <<set $humanity to Math.max(0, $humanity - 4)>>
 <<set $okaforAwareness to $okaforAwareness + 2>>
 You run, and your new body does something with speed and container-canyons that a human sprinter simply couldn't, and you lose them inside two blocks. You also just confirmed, in the most physically undeniable way possible, that you are exactly the kind of thing Detective Okafor has been building a file on. She doesn't forget that.
@@ -621,14 +1064,91 @@ You run, and your new body does something with speed and container-canyons that 
 
 [[Get somewhere dark and still.->TheCityHub]]
 
+:: OkaforInterview
+<<set $okaforAwareness to $okaforAwareness + 1>>
+She's standing outside the car this time, coat open, hands in her pockets, and she has picked a spot with a wall at her back and forty metres of open concrete in front of her. She watched you come the entire way.
+
+"Adaeze Okafor," she says. "We've met. I've been doing this nineteen years and I want you to understand that I am not confused about what I'm looking at. I've got eleven victims in four months, all survivors, all anemic, all with the same two marks and the same missing forty minutes." She tilts her head. "Eleven. Not one body. Somebody out here is being careful, and I have spent three weeks trying to decide whether that makes me feel better or worse."
+
+<<if $memoryTier > 0>>
+You can smell the exhaustion on her — three days of it, minimum, the specific sour note of a person running on gas-station coffee and stubbornness.
+<</if>>
+
+<<if $past == "nurse">>
+There's a hospital lanyard clipped inside her coat pocket. Visitor badge. Someone she's been sitting with. You know the colour of that badge; you've handed out four hundred of them.
+<</if>>
+
+[[Tell her something true. Not everything. Something.->OkaforTruth]]
+[[Lie, completely and calmly.->OkaforLie]]
+[[Make her afraid of you. Make it stop being worth it to her.->OkaforThreaten]]
+
+:: OkaforTruth
+<<set $talkedDown to $talkedDown + 1>>
+<<set $okaforAwareness to $okaforAwareness + 1>>
+<<set $heat to Math.max(0, $heat - 6)>>
+<<set $humanity to Math.min(100, $humanity + 3)>>
+"Eleven survivors," you say. "You said it yourself. Whatever's doing this is choosing that."
+
+Okafor goes very still. "Is it."
+
+"It is." You hold her eyes. "It's not always going to be able to. But it is right now, and it's the only thing it's got that's worth anything."
+
+She doesn't reach for anything. She doesn't call it in. She just looks at you for a long, long moment with an expression you can't fully read — and the terrible thing, the thing you'll turn over for the rest of the week, is that a piece of it is something like relief.
+
+"Okay," she says finally. "Then here's mine. Number twelve is where the choosing stops being interesting to me. You understand what I'm telling you."
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> An investigator has been given a reason to hesitate.<br>Hesitation is not safety. It is only time.</div>
+
+<<include "SystemCheck">>
+
+[[Walk away. Slowly.->DocksEntry]]
+
+:: OkaforLie
+<<set $heat to Math.max(0, $heat - 3)>>
+<<set $okaforAwareness to $okaforAwareness + 1>>
+You give her a version of yourself that is boring in every direction — a name that isn't yours, a night shift that doesn't exist, a route home that would make sense if any of it were true. You are calm and consistent and entirely unmemorable, and you can see her deciding, in real time, to believe about sixty percent of it.
+
+"Sure," she says, in the tone of a woman writing your description down the second you're out of sight. "Get home safe."
+
+<<include "SystemCheck">>
+
+[[Go.->DocksEntry]]
+
+:: OkaforThreaten
+<<set $heat to Math.min(100, $heat + 14)>>
+<<set $humanity to Math.max(0, $humanity - 7)>>
+<<set $okaforAwareness to $okaforAwareness + 3>>
+<<set $recklessCount to $recklessCount + 1>>
+You let her see it. Not much — you don't touch her, you don't even move fast — you just stop performing humanity for about four seconds and let a nineteen-year veteran of Major Crimes look directly at what's actually standing in front of her.
+
+Her hand goes to her sidearm. It stays there. To her enormous credit, her voice barely shakes.
+
+"Yeah," she says quietly. "Okay. That's — okay."
+
+You leave her standing on the concrete. You have made her afraid, which was the goal, and you have also just converted a careful investigator into a woman who is going to stop being careful, which was not.
+
+<<include "SystemCheck">>
+
+[[Leave before you do something worse.->TheCityHub]]
+
 :: HollowEntry
 <<set $visitedHollow to true>>
 <<set $hunger to Math.min(100, $hunger + 4)>>
 Ashgrove Hollow announces itself before you're fully inside it: the streetlights get sparser, the cemetery wall runs along one whole side of the road, and the quiet has a pressure to it, like walking into a room where a conversation just stopped. This ground is claimed. You can feel that as a fact in your body, the way you'd feel a hand on your shoulder before you'd see whose it was.
 
+<<if $past == "nurse">>
+The funeral home on the corner took your patients for fourteen years. You have stood in that loading bay at four in the morning more times than you can stand to count, and you never once wondered who else was standing in it.
+<</if>>
+
 <<if $hollowResolved>>
 The claim-feeling still sits on the back of your neck, but it's settled into something closer to a held truce than a raised hand, at least for tonight.
 [[Move through the Hollow carefully.->HollowKestrelLore]]
+<<if $nightsPassed >= 3 && !$courtSummoned>>
+[[Voss is standing at the cemetery gate, and this time they're waiting for you.->CourtSummons]]
+<</if>>
+<<if $courtTaskDone>>
+[[Go and stand in front of the Provost again.->IlseAudience]]
+<</if>>
 <<else>>
 [[Press further in anyway.->HollowTrespassChoice]]
 <</if>>
@@ -653,9 +1173,10 @@ You turn around before whatever's out among the stones decides you're worth its 
 
 :: HollowRivalEncounter
 <<set $hollowResolved to true>>
+<<set $metVoss to true>>
 A figure steps out from between two mausoleums without a sound, which shouldn't be possible on gravel, and definitely shouldn't be possible for someone your senses insist is built like a linebacker. Their eyes catch what little light there is and throw it back wrong.
 
-"You're standing in the Hollow Court's ground, fledgling," they say, almost gently, which is somehow worse than if they'd shouted it. "That's usually a one-time mistake. How you leave here is up to you."
+"You're standing in the Hollow Court's ground, fledgling," they say, almost gently, which is somehow worse than if they'd shouted it. "Voss. I keep the borders. That's usually a one-time introduction. How you leave here is up to you."
 
 [[Back down. Apologize. Leave.->HollowSubmit]]
 [[Try to talk your way to an understanding.->HollowBargain]]
@@ -664,17 +1185,22 @@ A figure steps out from between two mausoleums without a sound, which shouldn't 
 :: HollowSubmit
 <<set $heat to Math.max(0, $heat - 5)>>
 <<set $humanity to Math.max(0, $humanity - 3)>>
-You lower your eyes, mumble something about not knowing the borders, and back away with your hands visible and your pride somewhere on the ground behind you. The enforcer watches you go without moving, and the shame of it sits worse than you expected — proof that whatever you are now, self-preservation still outranks dignity most nights.
+<<set $courtStanding to $courtStanding + 1>>
+You lower your eyes, mumble something about not knowing the borders, and back away with your hands visible and your pride somewhere on the ground behind you. Voss watches you go without moving, and the shame of it sits worse than you expected — proof that whatever you are now, self-preservation still outranks dignity most nights.
+
+"Good," they say to your back. "Learnable. The Court prefers learnable."
 
 <<include "SystemCheck">>
 
 [[Leave the Hollow.->TheCityHub]]
 
 :: HollowBargain
-<<set $heat to $heat + 5>>
-"I didn't know the ground was claimed," you say, which is true, and somehow that lands better than an apology would have. The enforcer studies you for a long moment — long enough that you can feel your own pulse-that-isn't-a-pulse in your ears — and then, unexpectedly, huffs something like a laugh.
+<<set $heat to Math.min(100, $heat + 5)>>
+<<set $courtStanding to $courtStanding + 2>>
+<<set $talkedDown to $talkedDown + 1>>
+"I didn't know the ground was claimed," you say, which is true, and somehow that lands better than an apology would have. Voss studies you for a long moment — long enough that you can feel your own pulse-that-isn't-a-pulse in your ears — and then, unexpectedly, huffs something like a laugh.
 
-"Ignorant, not stupid. There's a difference, and it'll keep you alive a little longer than most of your kind manage." They step back, motion toward the wall. "Learn the borders. Don't test them twice."
+"Ignorant, not stupid. There's a difference, and it'll keep you alive a little longer than most of your kind manage." They step back, motion toward the wall. "Learn the borders. Don't test them twice." A pause. "And when the Provost asks who you were, I'll tell her you were polite. That's worth more than you currently understand."
 
 <<include "SystemCheck">>
 
@@ -682,9 +1208,11 @@ You lower your eyes, mumble something about not knowing the borders, and back aw
 
 :: HollowFight
 <<set $humanity to Math.max(0, $humanity - 12)>>
-<<set $heat to $heat + 10>>
+<<set $heat to Math.min(100, $heat + 10)>>
 <<set $recklessCount to $recklessCount + 2>>
-You go in swinging, and for about four seconds it even seems to work — until the enforcer stops toying with you and shows you exactly how much older, stronger, and more patient they actually are. You end up face-down in wet gravel with a knee between your shoulder blades and a voice at your ear informing you, almost bored, that they could end you right now and no one would ever ask a single question about it.
+<<set $scars to $scars + 1>>
+<<set $courtStanding to $courtStanding + 1>>
+You go in swinging, and for about four seconds it even seems to work — until Voss stops toying with you and shows you exactly how much older, stronger, and more patient they actually are. You end up face-down in wet gravel with a knee between your shoulder blades and a voice at your ear informing you, almost bored, that they could end you right now and no one would ever ask a single question about it.
 
 They let you up anyway. "Discipline," they say, stepping back, "is what that was supposed to teach you. Don't waste the lesson." Something in your body has changed, cold and permanent, learned the hard way.
 
@@ -696,6 +1224,8 @@ They let you up anyway. "Discipline," they say, stepping back, "is what that was
 <<set $humanity to Math.min(100, $humanity + 1)>>
 <<if $metKestrel && $kestrelStanding >= 2>>
 You think of something Kestrel said and, for once, take the careful path through instead of the direct one — skirting the mausoleums, staying off the gravel where footsteps carry. It works. Nothing stirs. Whatever claims this ground, tonight it doesn't feel the need to remind you.
+
+There's a grave near the north wall with no name on it, just a date eleven months after another date. You think about Kestrel's childe, and you keep walking, and you don't mention it to them.
 <<else>>
 You move through as quietly as you can manage, and mostly, tonight, that's enough.
 <</if>>
@@ -704,10 +1234,394 @@ You move through as quietly as you can manage, and mostly, tonight, that's enoug
 
 [[Head back to the hub.->TheCityHub]]
 
+:: CourtSummons
+<<set $courtSummoned to true>>
+<<set $courtStanding to $courtStanding + 1>>
+<<set $metIlse to true>>
+Voss is at the gate with their hands folded, and they fall into step beside you without asking, which is its own kind of answer about whether this is a request.
+
+The Hollow Court does not meet in a throne room. It meets in the back office of a monument mason's yard, under a bare bulb, surrounded by half-carved headstones waiting on names. There are four of them in the room and only one of them matters: a small, grey-haired woman in a cardigan doing a crossword, who does not look up for a full twenty seconds after you enter.
+
+"Provost Ilse Corven," Voss says.
+
+"You've been busy," Ilse says, still writing. "Eleven feedings that I know about. A detective with a case number. A block in Midtown you've started walking like you own it." She fills in a word. "Most fledglings your age are either dead or somebody's pet. You are neither, and that's untidy, and untidiness is the only thing in this city I'm actually paid to have opinions about."
+
+She finally looks up. Her eyes are the oldest thing in the room by a margin you can't calculate.
+
+"So. I have a use for you, or I have a problem. Let's find out which."
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Faction contact: <strong>THE HOLLOW COURT</strong>.<br>Standing: $courtStanding. Unaffiliated status is no longer available to you.</div>
+
+<<include "SystemCheck">>
+
+[[Ask what the use would be.->CourtTask]]
+[[Tell her you're not for hire.->CourtRefuse]]
+
+:: CourtRefuse
+<<set $courtStanding to Math.max(-3, $courtStanding - 2)>>
+<<set $humanity to Math.min(100, $humanity + 2)>>
+"I'm not for hire," you say. "Not yours, not anyone's. I didn't ask for any of this and I'm not going to start taking orders about it."
+
+Ilse's expression doesn't change at all, which is worse than if it had. "Noted," she says, and goes back to the crossword. "You may go."
+
+Voss walks you out. At the gate, quietly, without looking at you: "That was either the bravest or the stupidest thing I've watched anyone do in that room. She'll respect it. Respect isn't protection. Try to remember the difference before something makes you learn it."
+
+<<include "SystemCheck">>
+
+[[Leave the Hollow.->TheCityHub]]
+
+:: CourtTask
+<<if $courtTaskDone>>
+"You've done what I asked," Ilse says. "Don't develop a taste for being useful. It's how the tedious ones end up with jobs."
+
+[[Leave it there.->TheCityHub]]
+<<else>>
+"Two untidy things in my city," Ilse says. "You may remove one of them, and I will consider you a use rather than a problem."
+
+She holds up one finger. "There is a second fledgling in Midtown. No sire, same as you, considerably less careful. They will be dead or caught inside a month and they will take somebody's territory down with them when they go."
+
+A second finger. "There is a detective with eleven case files and a composite sketch. She is competent, which makes her a schedule rather than a possibility."
+
+She goes back to the crossword. "Pick. I genuinely don't mind which."
+
+[[Take the fledgling. Sable is your problem anyway.->CourtTaskSable]]
+[[Take the detective. Okafor is the bigger threat.->CourtTaskOkafor]]
+[[Ask what happens to whichever one you don't pick.->CourtTaskQuestion]]
+<</if>>
+
+:: CourtTaskQuestion
+<<set $humanity to Math.min(100, $humanity + 2)>>
+<<set $talkedDown to $talkedDown + 1>>
+"What happens to the one I don't pick?"
+
+Ilse looks up properly for the second time tonight. Something in the set of her mouth suggests the question is not one she's often asked in that room.
+
+"Voss handles it," she says. "Voss is extremely good and not remotely careful, and the outcomes tend to be permanent." She taps the pen twice. "You're asking whether choosing one saves the other. It does, for a while. That's the entire offer. I'd take it, in your position, and I'd stop asking questions that make it obvious you have something to protect."
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Information acquired at cost.<br>The Court now knows you have leverage points.</div>
+
+<<include "SystemCheck">>
+
+[[Take the fledgling.->CourtTaskSable]]
+[[Take the detective.->CourtTaskOkafor]]
+
+:: CourtTaskSable
+<<set $courtTaskDone to true>>
+<<set $courtStanding to $courtStanding + 3>>
+<<set $sableStanding to $sableStanding - 2>>
+<<set $metSable to true>>
+<<set $sableResolved to true>>
+You take the fledgling.
+
+It takes you two nights to find where Sable dens — a storage unit off the expressway with a bent roller door and a nest of stolen blankets in it, which is such a fledgling thing to do that it hurts to look at. You wait for them to come home at four in the morning and you tell them, flatly, that the Hollow Court has noticed them and that they have until dawn tomorrow to be out of this city.
+
+Sable calls you a liar, then a coward, then — when it becomes clear you're neither — goes very quiet and asks where they're supposed to go.
+
+You don't have an answer. You give them a bus timetable and forty dollars out of a wallet that isn't yours and you watch them decide, in real time, that surviving is worth being humiliated by someone their own age.
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Task complete. Court standing: <strong>$courtStanding</strong>.<br>A rival removed without a body. The Court files this as competence. You may file it however you like.</div>
+
+<<include "SystemCheck">>
+
+[[Report back.->TheCityHub]]
+
+:: CourtTaskOkafor
+<<set $courtTaskDone to true>>
+<<set $courtStanding to $courtStanding + 3>>
+<<set $okaforAwareness to Math.max(0, $okaforAwareness - 2)>>
+<<set $heat to Math.max(0, $heat - 10)>>
+You take the detective.
+
+Not the way the Court means it. You spend three nights doing something far more tedious than murder: you make her case fall apart. Two of her eleven survivors recant after a quiet conversation in a hospital corridor. A chain of custody gets a hole in it. An anonymous tip sends Major Crimes forty hours into a dead end involving a man in Rockford who has never met you.
+
+By the end of it, Okafor has a case that no prosecutor in this state will touch, and she knows exactly why, and she cannot prove a single part of it.
+
+You did not hurt her. You took nineteen years of somebody's competence and made it worthless, and you're not sure that's better.
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Task complete. Court standing: <strong>$courtStanding</strong>.<br>Investigation degraded. Investigator intact. The System notes you had other options.</div>
+
+<<include "SystemCheck">>
+
+[[Report back.->TheCityHub]]
+
+:: IlseAudience
+<<set $courtStanding to $courtStanding + 1>>
+Ilse has finished the crossword. She's started another one.
+
+"You're still here," she observes. "Fledglings who do one job for me usually either vanish or start asking for a second. You've done neither, which I'll admit I find restful."
+
+She sets the pen down — the first time you've seen her put it down — and looks at you with something that isn't quite warmth but is adjacent to it.
+
+"A piece of advice you didn't ask for. Everything in this city that matters is a question of what you'll be holding when the noise starts. Territory. A Court. An old thing on a dock who's decided you're worth the trouble. A mortal who knows." She picks the pen back up. "Some people hold nothing on purpose. That works too, for a certain kind of person, right up until it doesn't."
+
+<<include "SystemCheck">>
+
+[[Leave the mason's yard.->TheCityHub]]
+
+:: SableFirstMeet
+<<set $metSable to true>>
+<<set $hunger to Math.min(100, $hunger + 2)>>
+You feel them before you see them — a wrongness in the crowd flow, people parting around something they haven't consciously noticed. Then you see them: maybe nineteen, oversized denim jacket, moving down the far side of the street with the exact jittery over-alertness you remember having about four nights ago.
+
+They clock you at the same moment. Both of you stop. There is a long, absurd second where two dead things stand on opposite sides of a Midtown street at 2 a.m. and try to work out the etiquette.
+
+"You're like me," they say, too loud, crossing without looking. Up close they're all nerve. "You're — okay. Okay. Sable. That's what I'm going with, anyway, the other name doesn't really work anymore." A brittle laugh. "Do you know what happened to us? Does anybody know what happened to us?"
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Second unclaimed instance detected in local territory.<br>Sire: <strong>UNKNOWN</strong>. Designation: <strong>SABLE</strong>.<br>Note: shared origin unconfirmed. Coincidence unlikely.</div>
+
+[[Tell them what little you know.->SableHelp]]
+[[Tell them nothing. They're competition.->SableCold]]
+[[Ask them what they remember about the night it happened.->SableOrigin]]
+
+:: SableHelp
+<<set $sableStanding to $sableStanding + 3>>
+<<set $humanity to Math.min(100, $humanity + 2)>>
+You tell them. The hunger and how it lies to you about urgency, the way careful feeding costs less than it looks like it costs, the fact that there is at least one very old person on the Docks who will answer questions if you sit still long enough. You tell them about the Hollow Court's borders, which is the part that might actually keep them alive.
+
+Sable listens with the total, undefended attention of someone who has spent four nights assuming they were the only one.
+
+"Okay," they say at the end, and their voice does something they clearly hate. "Okay. Thanks. I've been — it's been a really bad week, actually."
+
+<<include "SystemCheck">>
+
+[[Stay a while. Neither of you has anywhere to be.->MidtownEntry]]
+
+:: SableCold
+<<set $sableStanding to $sableStanding - 3>>
+<<set $humanity to Math.max(0, $humanity - 3)>>
+You look at them — at the jacket, at the shake in their hands, at the four days of hunger doing exactly to them what it did to you — and you calculate, quite deliberately, that this block only supports one of you.
+
+"No," you say. "I don't know anything. Don't follow me."
+
+You leave them standing on the sidewalk. Behind you, you hear them say your non-answer back to themselves, quietly, testing it, the way people do when they're deciding what a thing means about them.
+
+<<include "SystemCheck">>
+
+[[Walk away.->MidtownEntry]]
+
+:: SableOrigin
+<<set $sableStanding to $sableStanding + 2>>
+"What do you remember? About that night."
+
+Sable's face goes through several things. "Concrete," they say. "And — this is stupid — a taste like a match. Like someone struck a match in my mouth."
+
+The street noise keeps going. You don't say anything for a second too long.
+
+"You too," they say. It isn't a question. "You too. So there's someone. There's someone doing this and they just — leave us? What kind of person makes something and leaves it in an alley?"
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Sire status cross-referenced: <strong>UNKNOWN — CONSISTENT</strong>.<br>Two subjects. Identical initiation signature. The System has no record of who wrote it.</div>
+
+You don't have an answer. Neither of you does. It's the first time since you woke up that the not-knowing has felt less like your private problem and more like a fact about the world.
+
+<<include "SystemCheck">>
+
+[[Tell them what you've learned so far.->SableHelp]]
+[[Leave it there. Some questions get worse with company.->MidtownEntry]]
+
+:: SableConfront
+<<set $sableResolved to true>>
+Sable is feeding behind the parking structure when you find them, and they are doing it badly — noisy, panicked, the man's legs kicking against a dumpster loud enough to carry two blocks. They come off him with their eyes wild and blood on their chin and they see you and immediately, transparently, brace for a fight.
+
+The man is alive. He's crying. Sable is nineteen and starving and has just realized, about one second too late, that they did this within sight of a working camera.
+
+<<if $sableStanding >= 3>>
+"I know," they say, before you can speak. "I <em>know.</em> I couldn't— it got away from me."
+<<else>>
+"This is my block now," they say, and their voice cracks straight through the middle of it.
+<</if>>
+
+[[Help them clean it up. Handle the man, handle the camera, handle it.->SableAlly]]
+[[Put them down hard. This block can't carry two of you.->SableFight]]
+[[Tell them to leave the city tonight, and mean it.->SableWarn]]
+
+:: SableAlly
+<<set $sableStanding to $sableStanding + 4>>
+<<set $humanity to Math.min(100, $humanity + 4)>>
+<<set $heat to Math.max(0, $heat - 6)>>
+<<set $carefulStreak to $carefulStreak + 1>>
+<<set $talkedDown to $talkedDown + 1>>
+You take the camera first — nine years of knowing where they are, or four nights of learning fast, depending on which of you is telling it — and then you take the man, gently, and sit with him until the shaking stops and he's decided this was a mugging that went strangely and not the other thing.
+
+Then you take Sable by the elbow and walk them six blocks and make them sit on a wall and you talk them down out of the worst of it.
+
+"You're not going to be able to do this alone," you tell them, which is the truest thing you know. "Neither am I. That's not a weakness in us. That's just the shape of it."
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Alliance established: <strong>SABLE</strong>.<br>Two unclaimed instances. One less alone than before.</div>
+
+<<include "SystemCheck">>
+
+[[Walk them home.->MidtownEntry]]
+
+:: SableFight
+<<set $sableStanding to $sableStanding - 5>>
+<<set $humanity to Math.max(0, $humanity - 9)>>
+<<set $recklessCount to $recklessCount + 1>>
+<<set $scars to $scars + 1>>
+<<set $heat to Math.min(100, $heat + 8)>>
+You don't argue. You cross the distance and you put them into the side of the parking structure hard enough to buckle the panel, and when they come back at you — and they do come back, screaming, all fear and no technique — you take the hit and then you finish it.
+
+They're on the ground. They're not getting up quickly. You could keep going and both of you know it.
+
+You don't. You stand over another nineteen-year-old with no sire and no idea what they are and you make yourself stop, and you tell yourself the stopping is the part that matters, and Sable looks up at you with an expression you are going to keep seeing for a long time.
+
+"You're the same as me," they say through a mouthful of blood. "That's the part I don't get. You're the <em>same as me.</em>"
+
+<<include "SystemCheck">>
+
+[[Leave them there.->MidtownEntry]]
+
+:: SableWarn
+<<set $sableStanding to $sableStanding - 1>>
+<<set $humanity to Math.min(100, $humanity + 1)>>
+<<set $talkedDown to $talkedDown + 1>>
+"Tonight," you say. "Not tomorrow. There's a Court in this city and they have a person whose entire job is what just happened behind that dumpster, and he is very good at it, and you will not see him coming."
+
+Sable starts to argue on reflex and then stops, because some animal part of them can hear that you aren't threatening them.
+
+"Where do I go," they say.
+
+"Anywhere with fewer cameras and no Court. Feed small. Count twice." You hear whose words those are as you say them. "Don't be alone if you can help it. That's all I've got."
+
+They go. You don't know if it works. You will genuinely never know, and that turns out to be its own weight to carry.
+
+<<include "SystemCheck">>
+
+[[Head back.->MidtownEntry]]
+
+:: JunieCall
+<<set $junieCalled to true>>
+Nine missed calls now. You've been letting it buzz itself out in your pocket for two nights, and tonight, standing under a dead streetlight with somebody else's blood still warm in you, you finally look at the screen while it's still ringing.
+
+JUNIE.
+
+Your sister is twenty-six and lives forty minutes across town and has called you nine times, which she has never done in her life, not once, not even the year everything fell apart.
+
+[[Answer it.->JunieAnswer]]
+[[Let it ring out. She's safer not knowing.->JunieIgnore]]
+
+:: JunieAnswer
+<<set $junieBond to $junieBond + 1>>
+<<set $metJunie to true>>
+<<set $humanity to Math.min(100, $humanity + 3)>>
+"Oh my god." Her voice cracks straight open. "Oh my <em>god</em>, you're — where have you been, they said there was— there was blood in the parking lot at your work, they said—"
+
+You close your eyes. Somewhere in the last five nights, somebody filed a missing person report on you and you never once considered that.
+
+<<if $past == "nurse">>
+"They found your badge in the lot, Bee. Your badge and your car and no you."
+<<elseif $past == "cook">>
+"Marco called me. He said you never came out after close and your bike's still chained up behind the kitchen."
+<<else>>
+"Your relief showed up at six and you weren't in the booth and the monitors were still running, they said the monitors were still running—"
+<</if>>
+
+"I'm okay," you say, and the lie is so enormous and so gentle that it makes something in your chest hurt in a way you'd assumed was no longer physically available to you.
+
+"You are not okay. Where <em>are</em> you."
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Prior-life contact re-established: <strong>JUNIE</strong>.<br>Subject is unaware of vessel status. Recommend—<br>[ recommendation field empty ]</div>
+
+<<include "SystemCheck">>
+
+[[Agree to meet her.->JunieMeet]]
+[[Tell her you'll call tomorrow, and hang up.->TheCityHub]]
+
+:: JunieIgnore
+<<set $junieBond to Math.max(0, $junieBond - 1)>>
+<<set $humanity to Math.max(0, $humanity - 4)>>
+You watch it ring. Eleven seconds. Twelve. It goes to voicemail and forty seconds later the notification comes up and you don't open that either.
+
+She's safer not knowing. You have constructed this reasoning very carefully over two nights and it is, as far as you can tell, completely sound, and it also happens to be the reasoning that requires the least of you.
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Contact declined.<br>Humanity anchor: no longer under active load.</div>
+
+<<include "SystemCheck">>
+
+[[Put the phone away.->TheCityHub]]
+
+:: JunieMeet
+<<set $metJunie to true>>
+<<set $junieBond to $junieBond + 1>>
+You pick a diner because diners are bright and public and full of witnesses, which is a sentence you would not have understood the significance of a week ago.
+
+Junie is in the back booth with her hands around a coffee she isn't drinking, and when she sees you she makes a sound and gets up too fast and hugs you, hard, and you stand there with your arms around your sister and every single one of your instincts screaming a completely different set of information at you about the artery under her ear.
+
+She pulls back. Looks at you properly. You watch her face work through it: the colour of you, the temperature of you, the fact that you haven't taken a breath in the eleven seconds she's been holding on.
+
+"You're freezing," she says slowly. "You're — why are you so—"
+
+<<include "SystemCheck">>
+
+[[Tell her the truth.->JunieTruth]]
+[[Lie. Something about a fever, a hospital, a long night.->JunieLie]]
+[[Leave. Right now, before the hunger finishes doing the arithmetic.->JunieLeave]]
+
+:: JunieTruth
+<<set $junieBond to $junieBond + 3>>
+<<set $humanity to Math.min(100, $humanity + 6)>>
+<<set $talkedDown to $talkedDown + 1>>
+You tell her in a diner booth at three in the morning, quietly, while a fry cook scrapes a griddle twenty feet away, and it is the single hardest thing you have done since you woke up in that alley.
+
+She doesn't believe you. Then she does, all at once, in the specific moment you let her put two fingers against the inside of your wrist and hold them there for a long, silent count of thirty.
+
+Junie sits back. Her eyes are enormous. She is, you realize with something like awe, not screaming.
+
+"Okay," she says. Her voice is a wreck. "Okay. So." She wipes her face with the heel of her hand, hard, once. "Have you hurt anybody."
+
+It would be so easy to lie about this part.
+
+"Yes," you say.
+
+"Have you killed anybody."
+
+<<if $humanity >= 60>>
+"No." And it's true, and you have never in your life been so grateful for a true thing.
+<<else>>
+"I don't know," you say, and that is the truth, and it is so much worse than either answer would have been.
+<</if>>
+
+Junie is quiet for a while. Then she reaches across the table and takes your cold hand in both of hers and doesn't let go.
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Anchor established: <strong>JUNIE</strong>.<br>One person in this city knows what you are and has not run.</div>
+
+<<include "SystemCheck">>
+
+[[Stay until the sky starts thinking about it.->TheCityHub]]
+
+:: JunieLie
+<<set $junieBond to $junieBond + 1>>
+<<set $humanity to Math.max(0, $humanity - 2)>>
+You give her a fever and a bad reaction and a night in an ER you can describe in enough clinical detail that it lands, and you watch your sister decide to believe you because the alternative is a version of the world she has no framework for.
+
+"You'd tell me," she says. "If something was really wrong. You'd tell me."
+
+"Yeah," you say.
+
+She hugs you again on the sidewalk and tells you to answer your phone, and you stand there and let her, and the whole time some clear cold part of you is noting that you have just successfully learned to lie to the last person alive who would have taken the truth.
+
+<<include "SystemCheck">>
+
+[[Watch her cab pull away.->TheCityHub]]
+
+:: JunieLeave
+<<set $junieBond to Math.max(0, $junieBond - 1)>>
+<<set $humanity to Math.max(0, $humanity - 3)>>
+<<set $hunger to Math.min(100, $hunger + 5)>>
+<<set $feedsDeclined to $feedsDeclined + 1>>
+You are out of the booth and out the door before she finishes the sentence, because the arithmetic had already started and you could feel where it was going.
+
+She follows you into the parking lot calling your name. You keep walking. You get around the corner of the building and you put your back against the brick and you stay there, entirely still, until the sound of her stops.
+
+You did the right thing. You are almost certain you did the right thing. It does not feel like anything except abandonment from either side of it.
+
+<<include "SystemCheck">>
+
+[[Go. Just go.->TheCityHub]]
+
 :: FrenzyEvent
 <<set $hunger to 15>>
 <<set $humanity to Math.max(0, $humanity - 15)>>
-<<set $heat to $heat + 25>>
+<<set $heat to Math.min(100, $heat + 25)>>
 <<set $recklessCount to $recklessCount + 1>>
 <<set $carefulStreak to 0>>
 <<set $feedsReckless to $feedsReckless + 1>>
@@ -728,48 +1642,75 @@ Letting the hunger get this far wasn't a decision so much as the absence of one.
 
 :: HunterAmbush
 <<set $okaforAwareness to $okaforAwareness + 2>>
-They come out of three directions at once, professional about it, no wasted movement — Okafor at the center, flanked by two others who move like they've done this before and survived it. "We know what you are," she says, not unkindly, which is almost the most unsettling part. "We know roughly how many people you've fed on in the last week. Tonight's the night that stops, one way or another."
+They come out of three directions at once, professional about it, no wasted movement — Okafor at the centre, flanked by two others who move like they've done this before and survived it. "We know what you are," she says, not unkindly, which is almost the most unsettling part. "We know roughly how many people you've fed on this week. Tonight's the night that stops, one way or another."
 
 <<if $disciplines.length > 0>>
-[[Choose how this ends.->HunterAmbushChoice]]
+Everything you've become since the alley is available to you right now, and none of it is a plan.
 <<else>>
 You have nothing built up to fall back on — no learned trick, no unnatural speed, no shadow to fold into. Just whatever you can do with a body that's still, functionally, new to you.
+<</if>>
 
 [[Choose how this ends.->HunterAmbushChoice]]
-<</if>>
 
 :: HunterAmbushChoice
 A half-second window, no more. Whatever you're going to do about this, you do it now.
 
-<<if $disciplines.includes("Potence")>>
-[[Fight your way through — Potence gives you the strength to try.->HunterFightPotence]]
+<<if $strengthTier > 0>>
+[[Fight your way through — Grave Strength gives you the means to try.->HunterFightStrength]]
 <</if>>
-<<if $disciplines.includes("Obfuscate")>>
-[[Fold into shadow and vanish — Obfuscate gives you the cover.->HunterFleeObfuscate]]
+<<if $stepTier > 0>>
+[[Fold into the dark and vanish — Hollow Step gives you the cover.->HunterFleeStep]]
+<</if>>
+<<if $voiceTier >= 2>>
+[[Talk. Just talk. Hold the whole street still with your voice.->HunterTalkVoice]]
 <</if>>
 [[Fight with nothing but what you've got.->HunterFightRaw]]
 [[Run with nothing but what you've got.->HunterFleeRaw]]
 
-:: HunterFightPotence
+:: HunterFightStrength
 <<set $heat to Math.max(0, $heat - 25)>>
 <<set $humanity to Math.max(0, $humanity - 8)>>
-Potence turns a hopeless fight into a survivable one — you break through the flanking pair hard enough to buy yourself a head start, and by the time Okafor's radioing for backup you're three rooftops away. It costs you something to hurt them to get free, and you know it, and you keep running anyway.
+<<set $scars to $scars + 1>>
+Grave Strength turns a hopeless fight into a survivable one — you break through the flanking pair hard enough to buy yourself a head start, and by the time Okafor's radioing for backup you're three rooftops away. It costs you something to hurt them to get free, and you know it, and you keep running anyway.
+
+One of them is going to need a surgeon. You heard the sound his shoulder made.
 
 <<include "SystemCheck">>
 
 [[Get somewhere they can't follow.->TheCityHub]]
 
-:: HunterFleeObfuscate
+:: HunterFleeStep
 <<set $heat to Math.max(0, $heat - 40)>>
-You go still, go quiet, let Obfuscate do the work Potence can't — not fighting your way out, just becoming the kind of nothing that professional attention slides right off of. Okafor's team searches a three-block radius and finds an empty alley and a very confused sense that they had someone cornered a minute ago.
+<<set $carefulStreak to $carefulStreak + 1>>
+You go still, go quiet, let Hollow Step do the work strength can't — not fighting your way out, just becoming the kind of nothing that professional attention slides right off of. Okafor's team searches a three-block radius and finds an empty alley and a very confused shared sense that they had someone cornered a minute ago.
+
+You are close enough, at one point, to hear her say "no, he was <em>right there</em>" to nobody in particular.
 
 <<include "SystemCheck">>
 
 [[Slip away while they're still looking.->TheCityHub]]
 
+:: HunterTalkVoice
+<<set $heat to Math.max(0, $heat - 30)>>
+<<set $talkedDown to $talkedDown + 1>>
+<<set $humanity to Math.min(100, $humanity + 2)>>
+<<set $okaforAwareness to $okaforAwareness + 1>>
+You don't run and you don't swing. You put your hands out where all three of them can see them and you start talking, low and level and completely without hurry, and the street does something that all four of you will think about later: it holds.
+
+You tell them the count. Eleven, all living. You tell them you know exactly what you are and that you have been managing it, badly, alone, for a week. You do not ask for anything, which is the part that works.
+
+Nobody fires. Nobody moves. Eventually Okafor lowers her weapon about fifteen degrees, which in the circumstances is practically an embrace, and says: "Walk. Slowly. We are absolutely not done."
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Confrontation resolved without violence.<br>This was not supposed to be one of the available outcomes.</div>
+
+<<include "SystemCheck">>
+
+[[Walk. Slowly.->TheCityHub]]
+
 :: HunterFightRaw
 <<set $heat to Math.max(0, $heat - 12)>>
 <<set $humanity to Math.max(0, $humanity - 10)>>
+<<set $scars to $scars + 1>>
 It's not a fight so much as a scramble — you get lucky more than you get skilled, take a hit that should probably have done more damage than it did, and manage to put enough distance and debris between you and them to break line of sight. It's ugly and it's close and it works, barely, and you know without being told that "barely" isn't a strategy you get to rely on twice.
 
 <<include "SystemCheck">>
@@ -779,7 +1720,10 @@ It's not a fight so much as a scramble — you get lucky more than you get skill
 :: HunterFleeRaw
 <<set $heat to Math.max(0, $heat - 15)>>
 <<set $humanity to Math.min(100, $humanity + 1)>>
-You run, plain and simple, no trick to fall back on, just a new body's speed against three people who trained for exactly this. It's closer than it should be. You make it, ducking through a gap they don't quite manage to cover in time, and you don't stop running until the city noise swallows the sound of pursuit behind you.
+<<set $scars to $scars + 1>>
+You run, plain and simple, no trick to fall back on, just a new body's speed against three people who trained for exactly this. It's closer than it should be — something clips you across the ribs on the way past a fence and you find out, interestingly, that you can keep running on a rib that's doing that.
+
+You make it, ducking through a gap they don't quite manage to cover in time, and you don't stop until the city noise swallows the sound of pursuit behind you.
 
 <<include "SystemCheck">>
 
@@ -787,14 +1731,11 @@ You run, plain and simple, no trick to fall back on, just a new body's speed aga
 
 :: NightReflection
 <<set $turn to 0>>
+<<set $nightsPassed to $nightsPassed + 1>>
+<<set $hunger to Math.min(100, $hunger + 6)>>
 You find somewhere still to let the night settle, and take stock of what it actually cost you.
 
-<div class="sys-pulse">
-<strong>[ SYSTEM — NIGHTLY SUMMARY ]</strong><br>
-Hunger: <strong>$hunger</strong>/100 &nbsp;|&nbsp; Humanity: <strong>$humanity</strong>/100 &nbsp;|&nbsp; Notoriety: <strong>$heat</strong>/100<br>
-Careful feedings: $feedsCareful &nbsp;|&nbsp; Reckless feedings: $feedsReckless<br>
-Disciplines known: <<if $disciplines.length > 0>><<print $disciplines.join(", ")>><<else>>none yet<</if>>
-</div>
+<div class="sys-pulse"><strong>[ SYSTEM — NIGHTLY SUMMARY ]</strong> &nbsp;Night $nightsPassed<br>Hunger: <strong>$hunger</strong>/100 &nbsp;|&nbsp; Humanity: <strong>$humanity</strong>/100 &nbsp;|&nbsp; Notoriety: <strong>$heat</strong>/100<br>Careful feedings: $feedsCareful &nbsp;|&nbsp; Reckless feedings: $feedsReckless &nbsp;|&nbsp; Refused: $feedsDeclined<br>Powers surfaced: <<if $disciplines.length > 0>><<print $disciplines.join(", ")>><<else>>none yet<</if>></div>
 
 <<if $humanity >= 70>>
 Whatever you're becoming, some part of you is still choosing it deliberately, still weighing a stranger's life against your own hunger and landing, more often than not, on mercy. That won't get easier. Tonight, at least, it held.
@@ -804,8 +1745,421 @@ You're not who you were a week ago, and you're honest enough with yourself, in t
 It's getting harder to remember exactly what you were protecting by staying careful in the first place. The hunger doesn't have to argue with you as hard as it used to. That should probably frighten you more than it does.
 <</if>>
 
-There's no sire to report to, no coven waiting to judge the tally, no ending screen. Just the city, still out there, still hungry in its own way, waiting to see what you do with tomorrow night.
+<<if $humanity <= 12>>
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Humanity anchor: <strong>FAILING</strong>.<br>There is very little left in this vessel that files its own decisions as decisions.</div>
 
-<<set $hunger to Math.min(100, $hunger + 6)>>
+[[Something is coming apart. Let the night take it.->TheLastNight]]
+<<elseif $heat >= 95>>
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Notoriety: <strong>TERMINAL</strong>.<br>Every system in this city that can look for you is now looking for you.</div>
+
+[[There isn't going to be another quiet night.->TheLastNight]]
+<<elseif $courtStanding >= 8>>
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Faction standing: <strong>THE HOLLOW COURT — DECISIVE</strong>.<br>You have become a question the Court intends to answer.</div>
+
+[[The Court has sent for you, and this time it isn't an invitation.->TheLastNight]]
+<<elseif $nightsPassed >= 6>>
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Observation window closing.<br>Multiple tracked threads converging on a single interval.</div>
+
+[[Everything you've set moving arrives tomorrow night.->TheLastNight]]
+<<else>>
+There's no sire to report to, no coven waiting to judge the tally. Just the city, still out there, still hungry in its own way, waiting to see what you do with tomorrow night.
 
 [[Go back out. It isn't over.->TheCityHub]]
+<</if>>
+
+:: TheLastNight
+<<set $endgame to true>>
+<<set $turn to 0>>
+The thing nobody tells you about consequences is that they don't arrive one at a time.
+
+They arrive the way weather arrives — all at once, from several directions, having been visible on the horizon for days to anyone who was looking. You have not been looking. You have been surviving, which is a different activity that feels identical from the inside.
+
+Tonight the sky opens.
+
+<div class="sys-pulse"><strong>[ SYSTEM — CONVERGENCE ]</strong> &nbsp;Night $nightsPassed<br>Hunger: <strong>$hunger</strong>/100 &nbsp;|&nbsp; Humanity: <strong>$humanity</strong>/100 &nbsp;|&nbsp; Notoriety: <strong>$heat</strong>/100<br>Tracked threads: converging. Observation window: closing.</div>
+
+<<if $okaforAwareness >= 4>>
+Okafor's people have been on your block since sundown. Not hiding it. Two cars and a van and a woman with nineteen years of patience who has finally stopped being interested in building a case.
+<<elseif $okaforAwareness >= 1>>
+There's an unmarked car three streets over that has been three streets over all night, no matter which three streets you pick.
+<<else>>
+Nobody official is looking for you tonight, which after this week feels less like luck and more like something you built.
+<</if>>
+
+<<if $courtStanding >= 5>>
+Voss left a message with a bartender who didn't understand a word of it: <em>the Provost is sitting up.</em> The Hollow Court does not sit up for fledglings.
+<<elseif $metVoss>>
+The cemetery quarter has gone quiet in a way you have learned to read. The Court is doing something tonight, and it involves you whether or not you attend.
+<</if>>
+
+<<if $metJunie && $junieBond >= 2>>
+And Junie has texted you an address and the word <em>please</em>, and has been sitting in a diner booth waiting since eleven.
+<</if>>
+
+<<if $metKestrel && $kestrelStanding >= 5>>
+Kestrel found you an hour ago, which they have never done — they wait, they don't seek — and said one sentence before walking off into the container canyons: "Whatever you're holding when this lands is what you'll be after."
+<</if>>
+
+<<if $humanity <= 15>>
+And under all of it, quieter and much closer than any of it, the thing you have been slowly becoming has stopped waiting its turn.
+
+[[There is no choice left to make. There hasn't been for a while.->PathBeast]]
+<<else>>
+Five nights ago you woke up in an alley with no sire, no coven, and no idea what you were. You have since become something specific. Tonight is where the city finds out what.
+
+[[Go and meet Okafor. End the hunt, one way or the other.->PathFight]]
+[[Disappear. Let every system that's tracking you lose the thread for good.->PathVanish]]
+<<if $visitedHollow>>
+[[Go to Ashgrove and stand in front of the Hollow Court.->PathCourt]]
+<</if>>
+<<if $metJunie || $metMira>>
+[[Go to the people who still think you're a person.->PathAnchor]]
+<</if>>
+<</if>>
+
+:: PathBeast
+There is a version of tonight where you make a decision. You can see it, distantly, the way you can see a lit window from a moving train.
+
+The hunger has stopped negotiating. It stopped somewhere around the third night and you didn't notice because by then it had already started doing your noticing for you. Every choice you've made since has been the hunger's choice wearing your reasoning like a coat, and the reasoning got thinner every time, and tonight it isn't there at all.
+
+You are aware — dimly, the way you're aware of a room you left an hour ago — that a woman with a badge is calling your name from the mouth of the alley. You are aware that somewhere across the city a phone is ringing out.
+
+You are aware, mostly, of the sound of blood in other people's necks. It is the loudest thing there has ever been.
+
+[[Let go.->EndingBeast]]
+
+:: EndingBeast [ending]
+<<set $endingRoute to "beast">>
+They will find the alley in the morning and the alley will not tell them very much.
+
+What's left of you doesn't den. Doesn't plan. It moves through the city on a logic with exactly one term in it, and by the end of the week the city has learned the shape of that logic well enough to change its own habits around it — bars closing early in three neighbourhoods, a bus route quietly rerouted, a rumour that turns into a warning that turns into the way people simply live now.
+
+Detective Adaeze Okafor closes eleven case files and opens one much larger one, and she never once uses the word she is actually thinking of, because there is no box for it on the form.
+
+Kestrel hears about it on the Docks and sits very still for a long time, and then goes back to watching the water, because there is nothing else that can be usefully done, and because they have done this once before.
+
+Somewhere a phone rings out. Junie leaves a nineteenth voicemail. There's nobody left to hear it — not gone, exactly. Just no longer anybody's brother, anybody's sister, anybody's <em>anything</em>. Just appetite, moving.
+
+The System is still running. It records everything now, and there is no longer anyone inside to read it.
+
+<div class="ending-card"><strong>ENDING — THE BEAST</strong><br>Humanity: <strong>$humanity</strong>/100 &nbsp;|&nbsp; Notoriety: <strong>$heat</strong>/100 &nbsp;|&nbsp; Nights survived: <strong>$nightsPassed</strong><br>You stopped being someone who happens to be a vampire.</div>
+
+:: PathFight
+You go to meet her, which is the one move nobody involved was expecting, least of all you.
+
+The lot behind the transit depot at 3 a.m. Okafor gets out of the car alone, which is either enormous professional courage or an enormous professional mistake, and stands there in the sodium light with her hands empty and her team fanned out at forty metres.
+
+"Okay," she says. "You came. That's — okay. That's something."
+
+You don't tell her it isn't mercy. You came because there is no version of the next month where you keep doing this and she keeps looking and nothing happens, and you have finally, five nights too late, started thinking past tomorrow.
+
+Her radio says something. Her expression changes.
+
+"They're moving," she says, and it isn't a threat, it's almost an apology. "That wasn't my call."
+
+<<if ($strengthTier >= 2 || $vigilTier >= 2 || $stepTier >= 2 || $senseTier >= 2 || $voiceTier >= 2 || $kestrelStanding >= 5) && $heat < 95>>
+[[The lot goes loud. You are, it turns out, ready for this.->EndingOpenRoad]]
+<<else>>
+[[The lot goes loud. You are not ready for this.->EndingDestroyed]]
+<</if>>
+
+:: PathVanish
+You have been practising this for five nights without knowing that's what you were doing.
+
+Every careful feeding. Every camera angle you drifted out of. Every witness you talked down instead of silenced, every night you went hungry rather than loud. It all had a shape and the shape was this: a person becoming difficult to have a record of.
+
+Tonight you finish the job. You walk out of Midtown at half past two and you do not walk into anywhere.
+
+<<if $stepTier >= 3 && $heat <= 25>>
+[[Let the city lose you.->EndingGhost]]
+<<else>>
+[[Try to let the city lose you.->EndingOpenRoad]]
+<</if>>
+
+:: PathCourt
+The monument yard is full tonight. Nine of them, maybe ten, standing among half-carved headstones in a silence that has weight to it. Voss is at the door and does not stop you, which tells you this was expected.
+
+Ilse Corven is not doing a crossword.
+
+"There you are," she says. "You've had a busy week and I've had a tedious one, and both of those facts are about to become the same fact." She folds her hands. "Here is where we are. You are unclaimed, competent, notorious, and standing in my yard. Historically that combination resolves in one of three ways, and I have always found it more efficient to simply ask which one you'd prefer."
+
+The room waits.
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Court standing: <strong>$courtStanding</strong>. Notoriety: <strong>$heat</strong>/100.<br>Three outcomes available. All of them are binding.</div>
+
+[[Kneel. Take the Court's protection and the Court's leash with it.->CourtKneel]]
+[[Challenge. Take the yard from whoever's holding it.->CourtChallenge]]
+[[Refuse. No Court, no leash, and no protection either.->CourtRefuseFinal]]
+
+:: CourtKneel
+You kneel on the gravel of a monument mason's yard in front of a small grey-haired woman in a cardigan, and it is the least dramatic thing you have ever done, and it changes everything.
+
+<<if $courtStanding >= 5>>
+[[Ilse puts her hand on the back of your neck.->EndingCourtBound]]
+<<else>>
+[[Ilse looks at you for a long moment, and does not take your hand.->EndingOpenRoad]]
+<</if>>
+
+:: CourtChallenge
+"The yard," you say. "I'll take the yard."
+
+The silence that follows is the most attentive silence you have ever stood in. Ilse's eyebrows go up perhaps two millimetres. Voss, from the doorway, makes a small sound that might be despair and might be delight.
+
+"Well," says the Provost. "Voss. If you would."
+
+<<if $strengthTier >= 2 && $scars >= 2>>
+[[Voss comes off the doorframe, and you are already moving.->EndingThroneRoom]]
+<<else>>
+[[Voss comes off the doorframe, and you understand immediately that you have made an error.->EndingDestroyed]]
+<</if>>
+
+:: CourtRefuseFinal
+"No," you say. "Not yours. Not anyone's. I've had five nights of everything in this city deciding what I am, and I'm going to be the one who does that."
+
+Ilse absorbs this with the mild interest of a woman who has heard it before and buried most of the people who said it.
+
+"That is your right," she says. "It is also, statistically, a form of suicide. Is there anyone at all who'd speak for you?"
+
+<<if $kestrelStanding >= 8>>
+[[Someone steps out of the dark at the back of the yard.->EndingKestrelsChilde]]
+<<else>>
+[[The yard is quiet. Nobody speaks.->EndingOpenRoad]]
+<</if>>
+
+:: PathAnchor
+You go to the diner.
+
+It is the least strategic decision available to you. Okafor's people are three streets over, the Court is sitting up, and every instinct you have developed in five nights of not dying is screaming that this is the single worst use of the most dangerous night of your life.
+
+<<if $metJunie>>
+Junie is in the back booth with a coffee she isn't drinking, exactly where she said she'd be, and she has been there since eleven.
+<<else>>
+Mira is closing up, chairs on tables, radio low, and she doesn't lock the door when she sees you coming.
+<</if>>
+
+You sit down across from someone who knew you before, and for the length of one conversation you are not managing anything.
+
+<<if $humanity >= 65 && ($junieBond >= 3 || $miraTrust >= 6)>>
+[[Let it be the thing you chose.->EndingAnchor]]
+<<else>>
+[[Try to explain what you've become.->EndingOpenRoad]]
+<</if>>
+
+:: EndingDestroyed [ending]
+<<set $endingRoute to "destroyed">>
+<<if $courtStanding > 0 && $strengthTier < 2>>
+Voss is not cruel about it. That's what you'll have time to notice, in the four seconds you have left to notice anything: there's no relish in it, no speech, no lesson. They cross the yard the way a professional crosses a yard, and the Court watches, and it takes less time than the walk over did.
+
+"Ignorant and stupid, in the end," Ilse says, not unkindly, to the room. "It so often goes that way. Voss, the north wall, if you would. There's space."
+
+There is a grave near the north wall with no name on it and a date eleven months after another date. Tomorrow night there will be a second one beside it, also unnamed, and the mason will carve neither, because the Hollow Court does not memorialize its untidiness.
+<<else>>
+It is over faster than anything this important should be.
+
+You have spent five nights learning that your body can do things bodies can't, and you have not spent five nights learning that six professionals with a plan and forty metres of open ground are a different category of problem entirely. The first round takes you off your feet. Nothing after that is a fight; it's just a procedure being completed correctly.
+
+The last thing you're aware of is Okafor's voice, close, saying something urgent into a radio — and the strange, distant realization that she sounds like a person trying to stop something rather than a person finishing it.
+
+She will not talk about that night, afterward. Not to the review board, not to her partner, not to the department psychologist she is required to see twice. Nineteen years and eleven survivors and this is the file she keeps in her desk instead of the cabinet.
+<</if>>
+
+The System runs for another few seconds after there is nothing left to run for. It does not editorialize. It has never editorialized.
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Vessel status: <strong>TERMINATED</strong>.<br>Final record closed. No recipient designated.</div>
+
+<div class="ending-card"><strong>ENDING — DESTROYED</strong><br>Notoriety: <strong>$heat</strong>/100 &nbsp;|&nbsp; Nights survived: <strong>$nightsPassed</strong> &nbsp;|&nbsp; Powers surfaced: <strong>$disciplines.length</strong><br>You ran out of night before you ran out of nerve.</div>
+
+:: EndingCourtBound [ending]
+<<set $endingRoute to "court">>
+Her hand is cold and dry and it rests on the back of your neck for perhaps three seconds, and the whole room exhales.
+
+"Right," says Ilse Corven, in exactly the tone of a woman ticking a box. "You're ours. Get up."
+
+That's it. That's the entire ceremony. You had expected — you're not sure. Blood, or Latin, or something with weight to it. Instead you get a small grey-haired woman telling you to get up off the gravel, and a job, and, within a month, an office.
+
+It is not a bad life, if life is still the word. The Court is old and slow and profoundly boring and it keeps its people alive, which is more than the last five nights managed. Okafor's file goes cold because the Court has been making files go cold since before her grandmother was born. Midtown becomes formally yours, on paper, in a ledger a mason's apprentice keeps in a drawer. You feed on a schedule. You have not frenzied in two years.
+
+You also do not go to the diner. Not once. There is a rule about prior-life contact and it was explained to you kindly and it is not negotiable, and the first year is the worst, and then it isn't, and that's somehow the part that costs the most.
+
+Voss becomes something close to a friend. Ilse gives you the crossword sometimes, which you eventually understand is the highest honour available.
+
+<<if $metKestrel && $kestrelStanding >= 4>>
+Kestrel stops speaking to you. Not dramatically — they simply aren't on the rail any more, any night you go. You understand exactly why. You made the choice anyway, and you'd probably make it again, and you still walk out to the Docks about once a month to check.
+<</if>>
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Affiliation: <strong>THE HOLLOW COURT</strong>.<br>Unclaimed status: revoked. Vessel is protected. Vessel is spoken for.</div>
+
+<div class="ending-card"><strong>ENDING — COURT-BOUND</strong><br>Court standing: <strong>$courtStanding</strong> &nbsp;|&nbsp; Humanity: <strong>$humanity</strong>/100 &nbsp;|&nbsp; Nights survived: <strong>$nightsPassed</strong><br>You traded the open road for a roof, and the roof is real.</div>
+
+:: EndingKestrelsChilde [ending]
+<<set $endingRoute to "kestrel">>
+"I will."
+
+Kestrel does not raise their voice. They never have. But the yard turns like a single animal, and Voss goes very still by the door, and Ilse Corven sets down her pen for the second time in her acquaintance with you.
+
+"Kestrel," she says. "You don't speak for people."
+
+"No," Kestrel agrees. They come forward through the headstones without hurrying. "Not since Ana. That was the arrangement I made with myself and I've kept it for sixty years, and I'm breaking it tonight, in your yard, in front of your Court, because this one turned up unclaimed and broadcasting and did not become what unclaimed things become." A pause. "You've been watching them all week same as I have. You know what they didn't do."
+
+Ilse looks at you for a long moment.
+
+"Fine," she says. "Sired, retroactively, by declaration. Ridiculous. Get out of my yard, both of you."
+
+Outside, on the road along the cemetery wall, neither of you says anything for about four blocks.
+
+"That was binding," Kestrel says eventually. "You understand that. It means obligations. It means when the Court calls a moot you go and you stand behind me and you say nothing, for about the next forty years."
+
+"Okay."
+
+"It also means," they say, and their voice does something you've never heard it do, "that if anything in this city comes for you, it comes through me first. That part is not a formality."
+
+You walk the rest of the way to the Docks together. They show you how to read the water. It takes four hours and you are terrible at it and they do not once lose patience, and somewhere around dawn you understand that you have not been given a mentor.
+
+You've been given a family, sixty years after it stopped being available to anyone.
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Sire: <strong>KESTREL</strong>.<br>Field populated. This field has been blank since initialization.</div>
+
+<div class="ending-card"><strong>ENDING — KESTREL'S CHILDE</strong><br>Kestrel standing: <strong>$kestrelStanding</strong> &nbsp;|&nbsp; Humanity: <strong>$humanity</strong>/100 &nbsp;|&nbsp; Nights survived: <strong>$nightsPassed</strong><br>You arrived with no sire. You leave with one who chose it.</div>
+
+:: EndingThroneRoom [ending]
+<<set $endingRoute to "throne">>
+You are already moving when Voss comes off the doorframe, and that is the whole difference.
+
+They are older than you, stronger than you, and better than you, and none of it survives contact with the fact that you have been put down three separate times this week and got up every time and learned something specific from each one. Voss has not lost a fight in ninety years. It shows. It shows in the way they expect the third exchange to end it, and it doesn't, and you watch something like genuine surprise cross their face right before the yard goes over sideways.
+
+It takes ninety seconds. Nobody in the room breathes, which for most of them is only a formality.
+
+When it's done you're standing over Voss in the gravel with your hand around a half-carved headstone you don't remember picking up, and you look at the Provost, and the Provost looks back at you with an expression of profound, weary irritation.
+
+"Oh, for—" Ilse Corven sits down on a workbench. "Fine. <em>Fine.</em> The yard is yours. Ashgrove is yours. I retain the office and the ledger and you will not enjoy the paperwork nearly as much as you enjoyed that."
+
+"That's it?"
+
+"What did you imagine, a crown?" She picks up her pen. "You took the yard. That's what taking the yard <em>is</em>. Now you have nine people looking at you wondering whether they should try it, and a detective with your composite in her desk, and a territory that has to be held every single night for as long as you last." She goes back to the crossword. "Congratulations. You've won the tedious thing."
+
+Voss gets up eventually, jaw wrong, and looks at you for a long moment — and then laughs, once, and offers a hand, and becomes the first person in this city to be genuinely, uncomplicatedly glad about who you turned out to be.
+
+You hold Ashgrove. You hold Midtown. You are twenty-nine years old and five nights dead and the most dangerous unclaimed thing in this city stopped being unclaimed the moment it became the thing everyone else measures themselves against.
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Territory: <strong>ASHGROVE HOLLOW — HELD</strong>.<br>Vessel is no longer tracked as a subject. Vessel is tracked as a condition.</div>
+
+<div class="ending-card"><strong>ENDING — THRONE ROOM</strong><br>Notoriety: <strong>$heat</strong>/100 &nbsp;|&nbsp; Scars taken: <strong>$scars</strong> &nbsp;|&nbsp; Nights survived: <strong>$nightsPassed</strong><br>You didn't hide from the city. You took a piece of it.</div>
+
+:: EndingAnchor [ending]
+<<set $endingRoute to "anchor">>
+<<if $metJunie>>
+You stay in the booth until the sky starts thinking about it, and then you stay a while longer.
+
+Junie does most of the talking. She has clearly been rehearsing — she has a <em>list</em>, on her phone, of questions, and about a third of them are practical (sunlight, mirrors, garlic, all of which she is delighted to be wrong about) and about a third are logistical, and the last third she doesn't read out.
+
+Around four she says: "So what happens now."
+
+"I don't know," you say. "I've spent five nights not asking that."
+
+"Okay." She turns her cup around. "Then here's my answer. You come here. Tuesdays. That's it, that's the whole plan, you come to this diner on Tuesdays and I see with my own eyes that you're still — " she gestures at all of you, "— <em>in</em> there. And if you ever stop being in there, I want you to tell me, and I'll figure out what to do about it, because I am not letting you decide that on your own at four in the morning."
+
+It is the most naive thing anyone has ever said to you and she means every word of it and you are absolutely going to hold on to it with both hands.
+<<else>>
+You stay until the chairs are on the tables and the radio's off, and Mira sits down across from you with her coat already on and doesn't ask you a single question you can't answer.
+
+"I'm not going to pretend I understand it," she says eventually. "I've had about a month to get used to something I still don't have a word for." She wraps both hands around a cold coffee. "But you've had eleven chances at me that I know about, and you're sitting in my closed bar at four in the morning not taking a twelfth, and I've decided that's the whole thing. That's the entire measurement."
+<</if>>
+
+You do not stop being what you are. That's the part nobody warns you about — there's no cure in this, no arc back to a pulse, no morning where it turns out to have been survivable in the ordinary way. The hunger is still there. It will be there in ten years.
+
+But it turns out that a hunger is easier to carry when someone knows you're carrying it. You feed carefully because there is now a specific person who would be disappointed, and it transpires that disappointing a specific person is a far more powerful mechanism than any amount of abstract morality at three in the morning.
+
+Okafor's file goes quiet, because eleven survivors stop becoming twelve.
+
+The Court leaves you alone, because there is nothing in you they can use.
+
+<<if $metKestrel && $kestrelStanding >= 3>>
+Kestrel tells you, on the rail, watching the water: "That's the harder one. Most of us pick a Court or a corner. Almost nobody picks a person." A long pause. "Ana would have. That's not a criticism."
+<</if>>
+
+You are a monster who goes to a diner on Tuesdays. It is not redemption. It is just a life, held together on purpose, by hand, every single night.
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Humanity anchor: <strong>SECURED — EXTERNAL</strong>.<br>Anomaly. The System has no model for a vessel that improves.</div>
+
+<div class="ending-card"><strong>ENDING — THE ANCHOR</strong><br>Humanity: <strong>$humanity</strong>/100 &nbsp;|&nbsp; Refused feedings: <strong>$feedsDeclined</strong> &nbsp;|&nbsp; Nights survived: <strong>$nightsPassed</strong><br>You chose the person over the power, and the person held.</div>
+
+:: EndingGhost [ending]
+<<set $endingRoute to "ghost">>
+There is no dramatic exit. That's the entire craft of it.
+
+You do not leave the city. You simply stop being a thing the city can hold on to. The apartment lease was never in your name after the second night. The phone went into the river off the Docks pier on the third. The face on Okafor's composite sketch was never quite right to begin with — you made sure of that, deliberately, four separate times, in four separate encounters that all felt at the time like ordinary survival.
+
+By the sixth night there is nothing to find. Not because it's hidden. Because it isn't there.
+
+Detective Adaeze Okafor works the case for another nine weeks. She is extremely good and it does not matter at all. Every thread she pulls comes out of the fabric clean — witnesses who are certain about everything except the face, camera footage where somebody's clearly present and somehow never quite in frame, eleven survivors whose accounts converge on a description of a feeling rather than a person. Eventually she gets a new caseload. She does not stop thinking about it. She keeps a photograph in her desk of an empty alley for reasons she declines to examine.
+
+The Hollow Court's ledger has a line in it that says <em>unclaimed, Midtown, careful</em> and then a date and then nothing. Ilse Corven considers the entry for a while and then rules the matter closed, which in her yard means: not our problem, and never was.
+
+<<if $metKestrel>>
+Kestrel goes on watching the water. Once, about a year on, they say to nobody in particular, "Good," and go back to it.
+<</if>>
+
+<<if $metJunie>>
+Junie's calls stop being answered around the fifth night. She files another report. She goes to the police station eleven times over the next two years. She never gets an answer, because there isn't one, because the answer would require somebody to exist in a system somewhere and you have very carefully arranged not to.
+
+Sometimes — twice a year, maybe — she gets a postcard with no message on it. She keeps every one. She has no idea what they mean and she is completely certain what they mean.
+<</if>>
+
+You are still here. That's the thing. You're in this city right now, feeding small, counting twice, moving through streets that have no record of you in any ledger, database, case file, or memory that holds its shape for more than an hour.
+
+Whether that's freedom or a very elaborate way of ceasing to exist is a question you have decided not to answer tonight.
+
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Subject not found.<br>Query returned no records. Query returned no records. Query returned no reco—</div>
+
+<div class="ending-card"><strong>ENDING — GHOST</strong><br>Hollow Step: <strong>tier $stepTier</strong> &nbsp;|&nbsp; Notoriety: <strong>$heat</strong>/100 &nbsp;|&nbsp; Nights survived: <strong>$nightsPassed</strong><br>Every system that was tracking you lost the thread. So, nearly, did you.</div>
+
+:: EndingOpenRoad [ending]
+<<set $endingRoute to "open">>
+Here's what actually happens: you get through the night.
+
+Not cleanly. Not with a resolution. You get through it the way you've got through the last five — improvising, mostly, using whatever's nearest, discovering somewhere around the fourth hour that you're better at this than you were on Monday and nowhere near as good as you'll need to be by Friday.
+
+Nothing is settled. That's not a failure of the night; that's just what the night was.
+
+<<if $heat >= 60>>
+Okafor still has a file. It's thinner than it was and it's still open, and she still drives past the Docks sometimes at the end of a shift for no reason she'd put in writing.
+<<else>>
+Okafor's file goes quiet for a while. Not closed. Quiet.
+<</if>>
+<<if $courtStanding >= 3>>
+The Hollow Court considers you a known quantity, which is not the same as an ally, and Ilse Corven's ledger has your name in it with no verdict written beside it yet.
+<<elseif $metVoss>>
+The Court knows your borders and you know theirs, and that arrangement holds for exactly as long as neither side finds it inconvenient.
+<</if>>
+<<if $miraTrust >= 3>>
+Mira still pours you a drink you don't touch, and still doesn't ask.
+<</if>>
+<<if $metJunie && $junieBond >= 1>>
+Junie still calls. You still, mostly, answer.
+<</if>>
+<<if $metKestrel && $kestrelStanding >= 3>>
+Kestrel is still on the rail, still watching the water, still willing to be sat next to.
+<</if>>
+
+You didn't become the Court's creature or the city's ghost or the thing in the alley that people reroute buses around. You didn't get taken apart in a monument yard or a parking lot. You went five nights without picking a single lane and the result is that all of them are, technically, still open.
+
+<div class="sys-pulse"><strong>[ SYSTEM — SUMMARY ]</strong><br>Hunger: <strong>$hunger</strong>/100 &nbsp;|&nbsp; Humanity: <strong>$humanity</strong>/100 &nbsp;|&nbsp; Notoriety: <strong>$heat</strong>/100<br>Careful: $feedsCareful &nbsp;|&nbsp; Reckless: $feedsReckless &nbsp;|&nbsp; Refused: $feedsDeclined<br>Affiliation: <strong>NONE</strong>. Territory: <<if $midtownClaim >= 2>><strong>MIDTOWN</strong><<else>><strong>NONE</strong><</if>>. Sire: <strong>UNKNOWN</strong>.</div>
+
+Sixth night. You start walking. The hunger comes up under your ribs the way it does, patient and enormous and entirely yours to manage, and somewhere across the city somebody is closing a bar and somebody else is running a case file and an old thing is sitting on a rail watching black water.
+
+None of it is finished. You find, walking, that you don't especially want it to be.
+
+<div class="ending-card"><strong>ENDING — THE OPEN ROAD</strong><br>Humanity: <strong>$humanity</strong>/100 &nbsp;|&nbsp; Notoriety: <strong>$heat</strong>/100 &nbsp;|&nbsp; Nights survived: <strong>$nightsPassed</strong><br>You leaned into nothing, and everything stayed possible.</div>
+
+:: About
+<div class="sys-pulse"><strong>[ SYSTEM — ABOUT ]</strong><br><strong>Blood Level Zero</strong> — a first-person, System-driven vampire sandbox.</div>
+
+Written as a Twee3 / SugarCube 2 story and compiled to a single standalone HTML file by a small hand-written interpreter. No backend, no account, no network call — everything you're reading is running locally in this page.
+
+''Eight endings'' are reachable depending on how you feed, who you trust, and what you're holding when the last night lands: The Beast, Destroyed, Court-Bound, Kestrel's Childe, The Anchor, Ghost, Throne Room, and The Open Road.
+
+''Content note:'' grounded horror — predatory tension, violence, and its consequences. No sexual content.
+
+The typefaces are Spectral and JetBrains Mono. Everything else here is CSS.
+
+[[Back to the street.->TheCityHub]]

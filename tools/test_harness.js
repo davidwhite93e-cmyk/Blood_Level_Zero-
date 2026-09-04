@@ -7,11 +7,11 @@ const src = fs.readFileSync(path.join(__dirname, '..', 'src', 'story.twee'), 'ut
 function pickChoice(choices, strategy, rng) {
   if (choices.length === 0) return null;
   if (strategy === 'careful') {
-    const c = choices.find(c => /careful|resist|decline|listen|submit|retreat|talk your way|evade.*talk|obfuscate/i.test(c.text));
+    const c = choices.find(c => /careful|resist|decline|listen|submit|retreat|talk your way|evade.*talk|hollow step|walk away|truth/i.test(c.text));
     return c || choices[0];
   }
   if (strategy === 'reckless') {
-    const c = choices.find(c => /reckless|hard|fight|threaten|run\.$|smuggler/i.test(c.text));
+    const c = choices.find(c => /reckless|hard|fight|threaten|run\.$|smuggler|challenge|force/i.test(c.text));
     return c || choices[choices.length - 1];
   }
   return choices[Math.floor(rng() * choices.length)];
@@ -35,36 +35,66 @@ function runPlaythrough(strategy, seed, steps) {
     const result = engine.goto(name);
     visited.add(result.passage);
     if (result.choices.length === 0) {
-      // dead end with no links - only acceptable if it's clearly a terminal (shouldn't happen in this game)
-      console.log(`[${strategy}#${seed}] DEAD END at "${result.passage}" (no choices) after ${i} steps`);
-      return { visited, ok: false };
+      // A passage with no onward links is only legitimate if it is a tagged ending.
+      if ((result.tags || []).includes('ending')) {
+        return { visited, ok: true, ending: result.passage, steps: i + 1 };
+      }
+      console.log(`[${strategy}#${seed}] DEAD END at "${result.passage}" (no choices, not an ending) after ${i} steps`);
+      return { visited, ok: false, ending: null };
     }
     const choice = pickChoice(result.choices, strategy, rng);
     name = choice.target;
   }
-  return { visited, ok: true };
+  // Running out of steps without reaching an ending is not a failure on its own —
+  // the sandbox is meant to be wanderable — but it is worth surfacing.
+  return { visited, ok: true, ending: null };
 }
 
 let allVisited = new Set();
 let failures = 0;
+const endingsReached = new Map();
+let reachedAnEnding = 0;
+let runs = 0;
 
-for (const strategy of ['careful', 'reckless', 'random', 'random', 'random', 'random']) {
-  for (let seed = 1; seed <= 3; seed++) {
+const strategies = ['careful', 'reckless', 'random', 'random', 'random', 'random'];
+strategies.forEach((strategy, idx) => {
+  for (let seed = 1; seed <= 6; seed++) {
+    runs++;
+    // Vary the seed by strategy *slot* as well as name, otherwise every 'random'
+    // entry draws the identical sequence and we only get one distinct random run.
+    const seedValue = seed * 7919 + idx * 104729 + strategy.length;
     try {
-      const { visited, ok } = runPlaythrough(strategy, seed * 17 + strategy.length, 200);
+      const { visited, ok, ending } = runPlaythrough(strategy, seedValue, 400);
       visited.forEach(v => allVisited.add(v));
       if (!ok) failures++;
+      if (ending) {
+        reachedAnEnding++;
+        endingsReached.set(ending, (endingsReached.get(ending) || 0) + 1);
+      }
     } catch (e) {
       failures++;
       console.log(`[${strategy}#${seed}] ERROR: ${e.message}`);
     }
   }
+});
+
+// Every run must terminate in an ending: the night auto-closes at dawn and the
+// endgame fires by night 6, so a run that just wanders forever is a pacing bug.
+if (reachedAnEnding !== runs) {
+  failures++;
+  console.log(`\nONLY ${reachedAnEnding}/${runs} runs reached an ending — some playthrough never converges.`);
 }
 
 const engineProbe = BLZCreateEngine(src);
 const allPassages = new Set(engineProbe.passageNames);
 const unvisited = [...allPassages].filter(p => !allVisited.has(p));
 
+console.log('\nPlaythroughs run:', runs);
+console.log('Runs that reached an ending:', reachedAnEnding);
+if (endingsReached.size) {
+  console.log('Endings reached by simulated play:');
+  [...endingsReached.entries()].sort().forEach(([k, v]) => console.log(`  - ${k} (x${v})`));
+}
 console.log('\nTotal reachable-content passages:', allPassages.size);
 console.log('Visited across all playthroughs:', allVisited.size);
 if (unvisited.length) {

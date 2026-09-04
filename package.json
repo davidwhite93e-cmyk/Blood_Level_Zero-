@@ -8,8 +8,9 @@
     "validate": "node tools/validate_links.js",
     "coverage": "node tools/coverage_check.js",
     "playthroughs": "node tools/test_harness.js",
+    "endings": "node tools/endings_check.js",
     "smoke": "node tools/smoke_test.js",
-    "test": "npm run validate && npm run coverage && npm run playthroughs",
+    "test": "npm run validate && npm run coverage && npm run playthroughs && npm run endings",
     "dev": "npm run build && npx --yes serve -l 4173 ."
   },
   "license": "UNLICENSED"

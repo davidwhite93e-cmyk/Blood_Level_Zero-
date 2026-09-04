@@ -88,6 +88,13 @@
   }
   .wordmark .title{ color:var(--bone-dim); }
   .wordmark .dot{ color:var(--blood-bright); }
+  .wordmark .night{
+    color:var(--muted);
+    font-size:.68rem;
+    letter-spacing:.14em;
+    margin-left:10px;
+  }
+  .mast-right{ display:flex; align-items:center; gap:8px; }
   .restart-link{
     font-family:'JetBrains Mono',monospace;
     font-size:.68rem;
@@ -159,7 +166,16 @@
     padding:2px 7px;
     color:var(--system);
     text-transform:uppercase;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
   }
+  .disciplines-row .tag .pips{
+    color:var(--blood-bright);
+    letter-spacing:.12em;
+    font-size:.6rem;
+  }
+  .disciplines-row .tag .pips .off{ color:var(--rule); }
 
   /* ---- Passage text ---- */
   #passage{ min-height:40vh; }
@@ -194,6 +210,20 @@
   @media (prefers-reduced-motion:reduce){
     .sys-pulse{ animation:none; }
   }
+
+  .ending-card{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.78rem;
+    line-height:1.7;
+    color:var(--bone-dim);
+    background:linear-gradient(180deg, rgba(92,20,31,.14), rgba(10,9,8,.5));
+    border:1px solid var(--blood-deep);
+    border-left:4px solid var(--blood-bright);
+    padding:16px 18px;
+    margin:28px 0 8px;
+    letter-spacing:.02em;
+  }
+  .ending-card strong{ color:var(--blood-bright); letter-spacing:.14em; }
 
   /* ---- Choices ---- */
   #choices{
@@ -230,6 +260,43 @@
   a.choice-link:hover::before{ color:var(--blood-bright); }
   a.choice-link:focus-visible{ outline:2px solid var(--system); outline-offset:1px; }
 
+  .end-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:8px;
+  }
+  .end-note{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.7rem;
+    letter-spacing:.06em;
+    color:var(--muted);
+    text-transform:uppercase;
+    margin:0 0 4px;
+  }
+
+  .resume-panel{
+    border:1px solid var(--rule);
+    border-left:3px solid var(--system-dim);
+    background:var(--panel);
+    padding:16px 18px;
+    margin:26px 0 0;
+  }
+  .resume-panel h2{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.72rem;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--system);
+    margin:0 0 8px;
+    font-weight:500;
+  }
+  .resume-panel p{
+    font-size:.95rem;
+    color:var(--bone-dim);
+    margin:0 0 14px;
+  }
+
   footer.notice{
     font-family:'JetBrains Mono',monospace;
     font-size:.62rem;
@@ -246,8 +313,10 @@
 <div id="app">
   <div class="masthead">
     <div class="wordmark">
-      <span class="title">Blood Level Zero<span class="dot">.</span></span>
-      <button class="restart-link" id="restartBtn" type="button">↺ begin again</button>
+      <span class="title">Blood Level Zero<span class="dot">.</span><span class="night" id="nightLabel"></span></span>
+      <span class="mast-right">
+        <button class="restart-link" id="restartBtn" type="button">↺ begin again</button>
+      </span>
     </div>
   </div>
 
@@ -257,57 +326,116 @@
   <main id="passage" aria-live="polite"></main>
   <div id="choices"></div>
 
-  <footer class="notice">SYSTEM ONLINE — TRACKING ACTIVE — SIRE: UNKNOWN — a Twine work-in-progress, playable build</footer>
+  <footer class="notice">SYSTEM ONLINE — TRACKING ACTIVE — SIRE: UNKNOWN — progress saves automatically in this browser</footer>
 </div>
 
 <script>
 /* ==== Blood Level Zero — embedded engine (SugarCube-subset interpreter) ==== */
 /*__ENGINE_JS__*/
 
-/* ==== Story source (identical to blood_level_zero.twee) ==== */
+/* ==== Story source (identical to src/story.twee) ==== */
 const TWEE_SOURCE = __TWEE_SOURCE_JSON__;
 
 /* ==== Controller ==== */
 (function(){
-  let engine = null;
+  var SAVE_KEY = 'blz-save-v1';
+  var engine = null;
 
-  const passageEl = document.getElementById('passage');
-  const choicesEl = document.getElementById('choices');
-  const statusEl = document.getElementById('statusStrip');
-  const discEl = document.getElementById('disciplinesRow');
-  const restartBtn = document.getElementById('restartBtn');
+  var POWERS = [
+    { key:'stepTier',     name:'Hollow Step',   max:3 },
+    { key:'strengthTier', name:'Grave Strength',max:3 },
+    { key:'senseTier',    name:'Wake-Sense',    max:2 },
+    { key:'voiceTier',    name:'Still Voice',   max:2 },
+    { key:'memoryTier',   name:'Blood Memory',  max:2 },
+    { key:'vigilTier',    name:'Cold Vigil',    max:2 }
+  ];
 
+  var passageEl  = document.getElementById('passage');
+  var choicesEl  = document.getElementById('choices');
+  var statusEl   = document.getElementById('statusStrip');
+  var discEl     = document.getElementById('disciplinesRow');
+  var nightEl    = document.getElementById('nightLabel');
+  var restartBtn = document.getElementById('restartBtn');
+
+  /* ---- persistence (best-effort; never let storage break the game) ---- */
+  function saveGame(passageName){
+    try {
+      localStorage.setItem(SAVE_KEY, JSON.stringify({
+        v: 1,
+        passage: passageName,
+        state: engine.state
+      }));
+    } catch (e) { /* private mode, quota, blocked storage — play on */ }
+  }
+  function loadGame(){
+    try {
+      var raw = localStorage.getItem(SAVE_KEY);
+      if (!raw) return null;
+      var data = JSON.parse(raw);
+      if (!data || data.v !== 1 || !data.passage || !data.state) return null;
+      return data;
+    } catch (e) { return null; }
+  }
+  function clearGame(){
+    try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* ignore */ }
+  }
+
+  /* ---- rendering ---- */
   function ticks(value, count){
-    const filled = Math.round((Math.max(0,Math.min(100,value)) / 100) * count);
-    let html = '';
-    for(let i=0;i<count;i++){
+    var v = Math.max(0, Math.min(100, Number(value) || 0));
+    var filled = Math.round((v / 100) * count);
+    var html = '';
+    for (var i = 0; i < count; i++){
       html += '<span class="' + (i < filled ? 'on' : '') + '"></span>';
     }
     return html;
   }
 
   function renderStatus(){
-    const s = engine.state;
-    const gauges = [
-      {key:'hunger', label:'Hunger', value:s.hunger, critical: s.hunger >= 85},
-      {key:'humanity', label:'Humanity', value:s.humanity, critical: s.humanity <= 40},
-      {key:'heat', label:'Notoriety', value:s.heat, critical: s.heat >= 60}
+    var s = engine.state;
+    var gauges = [
+      {key:'hunger',   label:'Hunger',    value:s.hunger,   critical: s.hunger >= 85},
+      {key:'humanity', label:'Humanity',  value:s.humanity, critical: s.humanity <= 40},
+      {key:'heat',     label:'Notoriety', value:s.heat,     critical: s.heat >= 60}
     ];
-    statusEl.innerHTML = gauges.map(g =>
-      '<div class="gauge ' + g.key + (g.critical ? ' critical' : '') + '">' +
-        '<div class="gauge-label"><span>' + g.label + '</span><span class="val">' + Math.round(g.value) + '</span></div>' +
+    statusEl.innerHTML = gauges.map(function(g){
+      return '<div class="gauge ' + g.key + (g.critical ? ' critical' : '') + '">' +
+        '<div class="gauge-label"><span>' + g.label + '</span><span class="val">' + Math.round(Number(g.value) || 0) + '</span></div>' +
         '<div class="ticks">' + ticks(g.value, 20) + '</div>' +
-      '</div>'
-    ).join('');
+      '</div>';
+    }).join('');
 
-    const known = (s.disciplines || []);
-    discEl.innerHTML = known.length
-      ? known.map(d => '<span class="tag">' + d + '</span>').join('')
-      : '<span style="opacity:.5">no disciplines surfaced yet</span>';
+    nightEl.textContent = s.nightsPassed ? ' / night ' + s.nightsPassed : '';
+
+    var tags = POWERS.filter(function(p){ return (Number(s[p.key]) || 0) > 0; }).map(function(p){
+      var tier = Number(s[p.key]) || 0;
+      var pips = '';
+      for (var i = 0; i < p.max; i++){
+        pips += i < tier ? '<span>&#9679;</span>' : '<span class="off">&#9679;</span>';
+      }
+      return '<span class="tag">' + p.name + '<span class="pips">' + pips + '</span></span>';
+    });
+    discEl.innerHTML = tags.length
+      ? tags.join('')
+      : '<span style="opacity:.5">no powers surfaced yet</span>';
+  }
+
+  function makeChoice(text, target){
+    var a = document.createElement('a');
+    a.href = '#';
+    a.className = 'choice-link';
+    a.textContent = text;
+    a.dataset.target = target;
+    a.addEventListener('click', function(ev){
+      ev.preventDefault();
+      window.scrollTo({top:0, behavior:'smooth'});
+      go(target);
+    });
+    return a;
   }
 
   function go(name){
-    let result;
+    var result;
     try {
       result = engine.goto(name);
     } catch (e) {
@@ -316,41 +444,109 @@ const TWEE_SOURCE = __TWEE_SOURCE_JSON__;
       console.error(e);
       return;
     }
+
     passageEl.innerHTML = result.html;
     renderStatus();
-
     choicesEl.innerHTML = '';
-    if (result.choices.length === 0) {
-      choicesEl.innerHTML = '<p style="font-family:\'JetBrains Mono\',monospace;font-size:.8rem;color:var(--muted)">— no further paths from here —</p>';
-    } else {
-      const row = document.createElement('div');
-      row.className = 'choice-row';
-      result.choices.forEach(c => {
-        const a = document.createElement('a');
-        a.href = '#';
-        a.className = 'choice-link';
-        a.textContent = c.text;
-        a.dataset.target = c.target;
-        a.addEventListener('click', function(ev){
-          ev.preventDefault();
-          window.scrollTo({top:0, behavior:'smooth'});
-          go(c.target);
-        });
-        row.appendChild(a);
+
+    var isEnding = (result.tags || []).indexOf('ending') !== -1;
+
+    if (isEnding) {
+      // The run is over — drop the checkpoint so "begin again" is a clean slate.
+      clearGame();
+      var note = document.createElement('p');
+      note.className = 'end-note';
+      note.textContent = '— end of run —';
+      var actions = document.createElement('div');
+      actions.className = 'end-actions';
+      var again = document.createElement('a');
+      again.href = '#';
+      again.className = 'choice-link';
+      again.textContent = 'Begin again, from the alley.';
+      again.addEventListener('click', function(ev){
+        ev.preventDefault();
+        window.scrollTo({top:0, behavior:'smooth'});
+        startNew();
       });
-      choicesEl.appendChild(row);
+      actions.appendChild(again);
+      choicesEl.appendChild(note);
+      choicesEl.appendChild(actions);
+      return;
     }
+
+    saveGame(result.passage);
+
+    if (result.choices.length === 0) {
+      choicesEl.innerHTML = '<p class="end-note">— no further paths from here —</p>';
+      return;
+    }
+
+    var row = document.createElement('div');
+    row.className = 'choice-row';
+    result.choices.forEach(function(c){
+      row.appendChild(makeChoice(c.text, c.target));
+    });
+    choicesEl.appendChild(row);
   }
 
-  function start(){
+  function startNew(){
+    clearGame();
     engine = BLZCreateEngine(TWEE_SOURCE);
     go(engine.startPassage);
   }
 
+  function resumeFrom(save){
+    engine = BLZCreateEngine(TWEE_SOURCE);
+    // StoryInit has already seeded defaults; overlay the saved run on top of them
+    // so that variables added since the save was written keep their defaults.
+    Object.keys(save.state).forEach(function(k){
+      engine.state[k] = save.state[k];
+    });
+    go(save.passage);
+  }
+
+  function showResumePrompt(save){
+    engine = BLZCreateEngine(TWEE_SOURCE);
+    renderStatus();
+    passageEl.innerHTML =
+      '<div class="resume-panel">' +
+        '<h2>[ SYSTEM ] Prior session detected</h2>' +
+        '<p>A run is already in progress — night ' + (save.state.nightsPassed || 1) +
+        ', humanity ' + Math.round(Number(save.state.humanity) || 0) + '/100. ' +
+        'Continue where you left off, or wake up in the alley again?</p>' +
+      '</div>';
+    choicesEl.innerHTML = '';
+    var row = document.createElement('div');
+    row.className = 'choice-row';
+
+    var cont = document.createElement('a');
+    cont.href = '#';
+    cont.className = 'choice-link';
+    cont.textContent = 'Continue this run.';
+    cont.addEventListener('click', function(ev){ ev.preventDefault(); resumeFrom(save); });
+
+    var fresh = document.createElement('a');
+    fresh.href = '#';
+    fresh.className = 'choice-link';
+    fresh.textContent = 'Start over from the beginning.';
+    fresh.addEventListener('click', function(ev){ ev.preventDefault(); startNew(); });
+
+    row.appendChild(cont);
+    row.appendChild(fresh);
+    choicesEl.appendChild(row);
+  }
+
   restartBtn.addEventListener('click', function(){
-    if (window.confirm('Begin the night again from the start?')) start();
+    if (window.confirm('Begin the night again from the start? This clears your saved progress.')) {
+      startNew();
+    }
   });
 
-  start();
+  var existing = loadGame();
+  if (existing) {
+    showResumePrompt(existing);
+  } else {
+    startNew();
+  }
 })();
 </script>

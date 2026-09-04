@@ -249,7 +249,7 @@ function BLZCreateEngine(tweeSource) {
       ensureAst(p);
       const raw = render(p.ast);
       const formatted = formatOutput(raw);
-      return { html: formatted, choices: getChoices(raw), passage: name };
+      return { html: formatted, choices: getChoices(raw), passage: name, tags: p.tags.slice() };
     },
     current() { return currentPassage; }
   };
