@@ -16,18 +16,66 @@
 Blood Level Zero
 
 :: Styles [stylesheet]
-body { background: #0b0a0d; color: #d8d0d2; font-family: Georgia, 'Times New Roman', serif; }
+/* Kept in sync with the :root palette, .sys-pulse and .ending-card rules in
+   web/template.html — those are the only two classes this story's passage
+   bodies actually emit, so they're what a real Twine import can reproduce.
+   The title screen, phone/contacts sidebar, portrait art, and Cinzel
+   Decorative branding are page-shell chrome built in web/template.html's
+   static HTML and JS controller, not story content — Twee passages are
+   narrative text, so there is no passage-level equivalent to update them
+   into. See README.md "How it's built" for the split between the two. */
+@import url('https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Cinzel+Decorative:wght@400;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  --void: #0a0908;
+  --panel: #141210;
+  --panel-2: #1b1815;
+  --rule: #332723;
+  --blood-deep: #5c141f;
+  --blood: #9c2233;
+  --blood-bright: #c93a4c;
+  --system: #8fa39c;
+  --system-dim: #5d6d68;
+  --bone: #ddd3c4;
+  --bone-dim: #9a9086;
+  --muted: #6b6259;
+  --warn: #c9963a;
+}
+
+body { background: var(--void); color: var(--bone); font-family: 'Spectral', Georgia, 'Times New Roman', serif; }
 #story { max-width: 720px; margin: 0 auto; }
-.sys-pulse { border: 1px solid #7a1f2b; background: rgba(122,31,43,0.12); color: #e7c8cc;
-  padding: 10px 14px; margin: 14px 0; font-family: 'Courier New', monospace; font-size: 0.9em;
-  letter-spacing: 0.02em; }
-.sys-pulse strong { color: #ff4d5e; }
-.ending-card { border: 1px solid #7a1f2b; border-left: 4px solid #ff4d5e; background: rgba(10,9,8,0.6);
-  padding: 16px 18px; margin: 18px 0; font-family: 'Courier New', monospace; font-size: 0.9em; }
-.ending-card strong { color: #ff4d5e; letter-spacing: 0.12em; }
-a.link-internal, a.macro-link { color: #c94b5a; }
-a.link-internal:hover, a.macro-link:hover { color: #ff8a95; }
-hr { border-color: #3a1418; }
+
+.sys-pulse {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--system);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--blood);
+  padding: 12px 14px;
+  margin: 20px 0;
+  letter-spacing: 0.01em;
+}
+.sys-pulse strong { color: var(--blood-bright); font-weight: 700; }
+
+.ending-card {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  line-height: 1.7;
+  color: var(--bone-dim);
+  background: linear-gradient(180deg, rgba(92,20,31,.14), rgba(10,9,8,.5));
+  border: 1px solid var(--blood-deep);
+  border-left: 4px solid var(--blood-bright);
+  padding: 16px 18px;
+  margin: 28px 0 8px;
+  letter-spacing: 0.02em;
+}
+.ending-card strong { color: var(--blood-bright); letter-spacing: 0.14em; }
+
+a.link-internal, a.macro-link { color: var(--blood); }
+a.link-internal:hover, a.macro-link:hover { color: var(--blood-bright); }
+hr { border-color: var(--rule); }
 
 :: StoryInit
 <<set $hunger to 78>>
