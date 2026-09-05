@@ -60,6 +60,10 @@ hr { border-color: #3a1418; }
 <<set $pastName to "">>
 <<set $playerName to "">>
 <<set $playerPortrait to "">>
+<<set $okaforPhoneCalled to false>>
+<<set $sablePhoneChecked to false>>
+<<set $sableOutcome to "">>
+<<set $miraPhoneChecked to false>>
 <<set $visitedMidtown to false>>
 <<set $visitedDocks to false>>
 <<set $visitedHollow to false>>
@@ -1441,6 +1445,7 @@ The man is alive. He's crying. Sable is nineteen and starving and has just reali
 [[Tell them to leave the city tonight, and mean it.->SableWarn]]
 
 :: SableAlly
+<<set $sableOutcome to "ally">>
 <<set $sableStanding to $sableStanding + 4>>
 <<set $humanity to Math.min(100, $humanity + 4)>>
 <<set $heat to Math.max(0, $heat - 6)>>
@@ -1459,6 +1464,7 @@ Then you take Sable by the elbow and walk them six blocks and make them sit on a
 [[Walk them home.->MidtownEntry]]
 
 :: SableFight
+<<set $sableOutcome to "fought">>
 <<set $sableStanding to $sableStanding - 5>>
 <<set $humanity to Math.max(0, $humanity - 9)>>
 <<set $recklessCount to $recklessCount + 1>>
@@ -1477,6 +1483,7 @@ You don't. You stand over another nineteen-year-old with no sire and no idea wha
 [[Leave them there.->MidtownEntry]]
 
 :: SableWarn
+<<set $sableOutcome to "left">>
 <<set $sableStanding to $sableStanding - 1>>
 <<set $humanity to Math.min(100, $humanity + 1)>>
 <<set $talkedDown to $talkedDown + 1>>
@@ -2169,3 +2176,80 @@ Written as a Twee3 / SugarCube 2 story and compiled to a single standalone HTML 
 The typefaces are Spectral and JetBrains Mono. Everything else here is CSS.
 
 [[Back to the street.->TheCityHub]]
+
+:: PhoneJunieWaiting
+<<if $metJunie>>
+It rings twice and goes to voicemail. Junie's outgoing message is the same one she's had for six years, cheerful in a way that doesn't match anything about tonight. You don't leave one either.
+<<else>>
+It rings out. Whatever you were going to say, apparently it can wait for both of you a little longer.
+<</if>>
+
+[[Put the phone away.->TheCityHub]]
+
+:: PhoneCallOkafor
+<<set $okaforPhoneCalled to true>>
+<<set $okaforAwareness to $okaforAwareness + 1>>
+<<set $heat to Math.max(0, $heat - 4)>>
+You still have the card from the pallet at the Docks, damp cardboard gone soft at the corners, her number legible only because you can read faster than the water could ruin it. You didn't plan on using it. You use it anyway.
+
+She picks up on the second ring, which tells you she's been waiting on a call from an unknown number for a while now. "Okafor."
+
+You don't say much. You don't have to. "I know who this is," she says, after a silence that goes on a beat too long to be comfortable for either of you. "You didn't have to call. I want you to sit with why you did."
+
+You hang up before she can make it a question. It doesn't undo the eleven survivors, and it doesn't close her case. It just puts one more thing on the record between you that isn't blood.
+
+<<include "SystemCheck">>
+
+[[Put the phone away.->TheCityHub]]
+
+:: PhoneCallOkaforAgain
+It rings through to a generic voicemail box that has never once had a message left on it by you, or, as far as you can tell, anyone else. You don't leave one this time either. Whatever you already said to her is still the last thing said.
+
+[[Put the phone away.->TheCityHub]]
+
+:: PhoneCallSable
+<<set $sablePhoneChecked to true>>
+<<set $sableStanding to $sableStanding + 1>>
+Sable picks up on the fourth ring, out of breath, like they answered mid-stride. "Oh — hey. Hi. Is this— yeah, obviously it's you, nobody else has this number." A pause, quieter. "I wasn't sure you'd actually use it."
+
+You ask how they're holding up. It's a small question and it costs you nothing, and on the other end of the line you can hear someone barely twenty deciding, in real time, whether it's safe to answer it honestly.
+
+"Getting better at counting twice," they say finally. "Some nights."
+
+<<include "SystemCheck">>
+
+[[Put the phone away.->TheCityHub]]
+
+:: PhoneCallSableAgain
+Sable answers fast this time — you're apparently no longer a surprising number to see light up. Nothing urgent, just a few minutes of two unclaimed things checking that the other one is still upright. It doesn't fix anything. It's still worth doing.
+
+[[Put the phone away.->TheCityHub]]
+
+:: PhoneCallSableGone
+The number rings twice and then delivers the flat, recorded voice of a network telling you it is no longer in service. You don't know if that means a new phone, a new city, or nothing you want to think about at one in the morning. You told them to disappear. Apparently they took the advice further than you meant it.
+
+[[Put the phone away.->TheCityHub]]
+
+:: PhoneCallSableFought
+It rings once and cuts to voicemail, which either means they saw your name and declined on purpose, or means the number was never really theirs to keep. Given what you did to them behind that parking structure, you don't feel entitled to wonder which.
+
+[[Put the phone away.->TheCityHub]]
+
+:: PhoneCallMira
+<<set $miraPhoneChecked to true>>
+<<set $miraTrust to $miraTrust + 1>>
+<<set $humanity to Math.min(100, $humanity + 1)>>
+Mira answers with the specific noise of someone balancing a phone on their shoulder while drying a glass. "Well, look who actually used the number." Radio low in the background, same as always. "You okay? You sound like you're standing somewhere with bad reception and worse decisions."
+
+You tell her you're fine. She doesn't believe you, and she doesn't push it either, which is its own kind of gift.
+
+"Come by when you can," she says. "Seat at the end of the bar's still yours."
+
+<<include "SystemCheck">>
+
+[[Put the phone away.->TheCityHub]]
+
+:: PhoneCallMiraAgain
+She picks up between orders, voice half-turned toward the bar the whole time. A couple of minutes of nothing important — the regulars, the landlord, a song she can't remember the name of — and then she has to go, and you let her.
+
+[[Put the phone away.->TheCityHub]]

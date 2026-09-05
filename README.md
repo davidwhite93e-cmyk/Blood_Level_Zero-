@@ -10,7 +10,7 @@ Open `index.html` in any browser. It's a single self-contained file — no serve
 
 Progress **saves automatically to your browser** at every step, so you can close the tab and pick the run back up later. Reopening offers *Continue* or *Start over*; finishing a run clears the checkpoint.
 
-The only thing the page ever fetches is two webfonts from Google Fonts, and the CSS declares real fallback stacks — offline, the game plays identically in Georgia and your system monospace.
+The only thing the page ever fetches at runtime is two webfonts from Google Fonts, and the CSS declares real fallback stacks — offline, the game plays identically in Georgia and your system monospace. The title-screen photography and portrait art are licensed images embedded directly in the file at build time (see [`web/assets/CREDITS.md`](web/assets/CREDITS.md)) — nothing is fetched from an image host while playing.
 
 ## What's in it
 
@@ -40,7 +40,9 @@ No NPC is disposable — even one-scene victims have names, details, and consequ
 
 **Territory and factions with weight.** Midtown can be claimed — contested first, then held the slow way or the fast way, with different costs — and claimed ground reduces the heat your feeding draws there. The Hollow Court is a standing you build across nights toward the Court-Bound and Throne Room endings, and Okafor's investigation escalates from chalk marks to a confrontation you can talk your way out of if you've built the voice for it.
 
-**A choice of who you were.** The opening asks the System to reconstruct your prior occupation — ER nurse, line cook, or night security — which colours how you read scenes across all three districts and what your sister says she lost.
+**A choice of who you were, and how you look.** The title screen asks the System to reconstruct your prior occupation — ER nurse, line cook, or night security — and lets you pick a name and one of four subject-visual photographs. Both persist through the whole run and show up in the masthead.
+
+**A phone, with real contacts.** A sidebar Phone button opens a contacts list — Junie, Det. Okafor (once you have her card), Sable, and Mira each become reachable as the story unlocks them, with call outcomes that reflect what's actually happened (Sable's number goes dead if you told them to leave town; Okafor's case notes shift if you've already talked to her in person). Kestrel is listed too, correctly, as someone who doesn't carry a phone.
 
 Content boundaries: grounded horror, predatory tension, and consequence. No sexual content.
 
@@ -78,10 +80,11 @@ The test suite is load-bearing, not decorative: `playthroughs` fails if any simu
 ## Repo layout
 
 ```
-src/story.twee          canonical narrative source (Twee3 / SugarCube subset), 121 passages
+src/story.twee          canonical narrative source (Twee3 / SugarCube subset), 130 passages
 src/engine.js           the interpreter that runs it standalone
-web/template.html       page shell: CSS, HTML structure, save system, controller JS
-tools/build.js          assembles index.html
+web/template.html       page shell: CSS, HTML structure, save system, phone/contacts UI, controller JS
+web/assets/             licensed images embedded into index.html at build time, + CREDITS.md
+tools/build.js          assembles index.html (engine + story + template + images)
 tools/validate_links.js, coverage_check.js, test_harness.js, endings_check.js, smoke_test.js   QA scripts
 index.html              built output — the actual playable game (generated, but committed)
 docs/design-doc.md      original creative brief

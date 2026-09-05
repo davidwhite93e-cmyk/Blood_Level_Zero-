@@ -72,9 +72,13 @@ const MAX_CLICKS = 300;
     errors.push(`identity chip shows "${identityName.trim()}", expected the entered name`);
   }
 
+  const phoneVisibleAtStart = await page.$eval('#phoneRail', el => !el.hidden).catch(() => false);
+  if (!phoneVisibleAtStart) errors.push('phone sidebar did not appear once the game began');
+
   let clicks = 0;
   let endingReached = null;
   let sawSave = false;
+  let phoneTested = false;
 
   // --- save / resume: play a little, reload the page, and continue the same run ---
   for (let i = 0; i < 12; i++) {
@@ -129,6 +133,40 @@ const MAX_CLICKS = 300;
       if (saved) sawSave = true;
     }
 
+    // --- phone / contacts: once night 2 hits, Junie is guaranteed to be a
+    // reachable contact (the hub offers her call from night 2 on too), so
+    // this is the first point a real run can exercise the feature for real.
+    if (!phoneTested) {
+      const nightText = await page.textContent('#nightLabel').catch(() => '');
+      const night = parseInt((nightText.match(/night (\d+)/) || [])[1] || '0', 10);
+      if (night >= 2) {
+        phoneTested = true;
+        await page.click('#phoneBtn');
+        const modal = await page.waitForSelector('#phoneModalBackdrop:not([hidden])', { timeout: 3000 }).catch(() => null);
+        if (!modal) {
+          errors.push('phone button did not open the contacts modal');
+        } else {
+          const rows = await page.$$('.contact-row');
+          if (rows.length < 5) errors.push(`expected 5 contact rows, found ${rows.length}`);
+          const junieCallBtn = await page.$('.contact-row:has-text("Junie") .call-btn');
+          if (!junieCallBtn) {
+            errors.push('Junie should be callable by night 2 but no Call button was found');
+          } else {
+            await junieCallBtn.click();
+            // Note: waitForSelector('sel[hidden]') defaults to state:'visible', which a
+            // hidden (display:none) element can never satisfy — check the property
+            // directly instead of fighting that default.
+            const modalClosed = await page.waitForFunction(
+              () => document.getElementById('phoneModalBackdrop').hidden,
+              { timeout: 3000 }
+            ).catch(() => null);
+            if (!modalClosed) errors.push('calling a contact did not close the phone modal');
+            await page.waitForSelector('#passage p', { timeout: 3000 });
+          }
+        }
+      }
+    }
+
     const links = await page.$$('a.choice-link');
     if (links.length === 0) {
       const snippet = (await page.textContent('#passage')).replace(/\s+/g, ' ').slice(0, 120);
@@ -150,8 +188,14 @@ const MAX_CLICKS = 300;
     els.map(e => e.textContent.replace(/\s+/g, ' ').trim()));
   console.log('Powers shown:', powerTags.length ? powerTags : '(none surfaced)');
 
+  if (!phoneTested) {
+    console.log('Note: run ended before night 2, so the phone/contacts feature was not exercised this pass.');
+  }
+
   if (endingReached) {
     console.log('Ending reached:', endingReached);
+    const phoneHiddenAtEnd = await page.$eval('#phoneRail', el => el.hidden).catch(() => false);
+    if (!phoneHiddenAtEnd) errors.push('phone sidebar stayed visible after the run ended');
     const cleared = await page.evaluate(() => {
       try { return localStorage.getItem('blz-save-v1') === null; } catch (e) { return true; }
     });
