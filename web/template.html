@@ -1112,7 +1112,10 @@ const TWEE_SOURCE = __TWEE_SOURCE_JSON__;
     startScreenEl.hidden = true;
     appEl.hidden = false;
     phoneRailEl.hidden = false;
-    go(engine.startPassage);
+    // The story's own start passage is a Twee-native title/name/portrait
+    // sequence (for real Twine) that this creation screen already covers —
+    // skip straight past it into the actual story so it isn't shown twice.
+    go(engine.startPassage === 'TitleScreen' ? 'Awakening' : engine.startPassage);
   }
 
   function returnToStartScreen(){

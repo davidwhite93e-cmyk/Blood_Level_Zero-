@@ -42,22 +42,21 @@ No NPC is disposable — even one-scene victims have names, details, and consequ
 
 **A choice of who you were, and how you look.** The title screen asks the System to reconstruct your prior occupation — ER nurse, line cook, or night security — and lets you pick a name and one of four subject-visual photographs. Both persist through the whole run and show up in the masthead.
 
-**A phone, with real contacts.** A sidebar Phone button opens a contacts list — Junie, Det. Okafor (once you have her card), Sable, and Mira each become reachable as the story unlocks them, with call outcomes that reflect what's actually happened (Sable's number goes dead if you told them to leave town; Okafor's case notes shift if you've already talked to her in person). Kestrel is listed too, correctly, as someone who doesn't carry a phone.
+**A phone, with real contacts.** A sidebar Phone button (`StoryMenu`, so it's genuinely persistent in real Twine, not just a UI overlay) opens a contacts list — Junie, Det. Okafor (once you have her card), Sable, and Mira each become reachable as the story unlocks them, with call outcomes that reflect what's actually happened (Sable's number goes dead if you told them to leave town; Okafor's case notes shift if you've already talked to her in person). Kestrel is listed too, correctly, as someone who doesn't carry a phone. It hides itself once the endgame starts — there's no one left to call mid-climax.
 
 Content boundaries: grounded horror, predatory tension, and consequence. No sexual content.
 
 ## How it's built
 
-The story lives in [`src/story.twee`](src/story.twee), written in real [Twee3](https://github.com/iftechfoundation/twine-specs/blob/master/twee-3-specification.md) notation using a subset of [SugarCube 2](https://www.motoslave.net/sugarcube/2/docs/) macros (`<<set>>`, `<<if>>/<<elseif>>/<<else>>/<</if>>`, `<<run>>`, `<<print>>`, `<<include>>`, naked `$variable` interpolation, `[[Link->Target]]` links). That means:
+**`src/story.twee` is the canonical deliverable.** It's written in real [Twee3](https://github.com/iftechfoundation/twine-specs/blob/master/twee-3-specification.md) notation and can be **imported directly into [Twine 2](https://twinery.org/)** (desktop or web) via *Import From File* — using the real, bundled SugarCube 2 story format, not a lookalike. Everything in it is standard SugarCube syntax: `<<set>>`, `<<if>>/<<elseif>>/<<else>>/<</if>>`, `<<run>>`, `<<print>>`, `<<include>>`, `<<textbox>>`, naked `$variable` interpolation, `[[Link->Target]]` links (including image links — several passages use `[[<img src="...">→Target]]` for the portrait picker), and the special `StoryCaption`/`StoryMenu` passages SugarCube itself recognizes for a persistent sidebar. All five embedded images (the title photo and four portraits) are inlined as base64 `data:` URIs directly in passage bodies — the `.twee` file has zero external file dependencies, in Twine or anywhere else.
 
-- It can be **imported directly into [Twine 2](https://twinery.org/)** (desktop or web) via *Import From File* and edited visually there, using the bundled SugarCube story format.
-- It's also interpreted by a small hand-written engine, [`src/engine.js`](src/engine.js) — a parser/runtime for exactly that macro subset — so the same source file runs standalone with no Twine runtime dependency and no external libraries.
+That sidebar is real: `StoryCaption` renders your name, portrait, and live Hunger/Humanity/Notoriety/powers on every passage; `StoryMenu` carries the persistent "☎ Contacts" link into `PhoneContacts`, a hub passage that lists Junie/Okafor/Sable/Mira/Kestrel with state-driven availability — the same logic, expressed as plain `<<if>>` chains so it's inspectable as prose, not hidden in application code.
 
-[`web/template.html`](web/template.html) is the page shell (fonts, CSS, the stat-gauge/power-tag UI, the save system, the controller script). [`tools/build.js`](tools/build.js) stitches `src/engine.js` + `src/story.twee` + `web/template.html` into the single-file `index.html` at the repo root.
+**A secondary, standalone build also exists**, for playing without Twine: [`src/engine.js`](src/engine.js) is a small hand-written interpreter for a *subset* of that same syntax, and [`tools/build.js`](tools/build.js) stitches it together with `src/story.twee` and the page shell in [`web/template.html`](web/template.html) into a single self-contained `index.html`. That subset doesn't include `<<textbox>>`, `StoryCaption`, or `StoryMenu` — real SugarCube features this project now uses for its sidebar and name entry — so in the standalone build those are silently inert (per the engine's documented behavior for unrecognized macros) and the equivalent UI is instead hand-built in `web/template.html`'s own JS controller. **If you're only keeping one file, keep `src/story.twee`** — it's complete on its own in real Twine; `index.html` is a convenience build for people who don't want to install Twine.
 
-Endings are marked with a Twee `[ending]` tag; the engine surfaces passage tags, which is how the UI knows to show the end-of-run card and how the test suite knows a passage with no onward links is a legitimate terminal rather than a dead end.
+Endings are marked with a Twee `[ending]` tag. In real Twine that's just a passage tag; the standalone engine also surfaces passage tags, which is how its UI shows the end-of-run card and how the test suite knows a passage with no onward links is a legitimate terminal rather than a dead end.
 
-**Keep authoring in real SugarCube syntax.** If you add a macro `engine.js` doesn't understand, both the custom interpreter *and* real Twine will silently misbehave differently — check `src/engine.js`'s macro list before reaching for new syntax, and extend the interpreter alongside the story content.
+**Keep authoring in real SugarCube syntax regardless of which build you extend.** If you add a macro `src/engine.js` doesn't understand, the standalone build will silently skip it (not crash) while real Twine renders it correctly — that divergence is expected for `StoryCaption`/`StoryMenu`/`<<textbox>>` already; check `src/engine.js`'s macro list before assuming new syntax will show up in both places.
 
 ## Scripts
 
@@ -80,13 +79,15 @@ The test suite is load-bearing, not decorative: `playthroughs` fails if any simu
 ## Repo layout
 
 ```
-src/story.twee          canonical narrative source (Twee3 / SugarCube subset), 130 passages
-src/engine.js           the interpreter that runs it standalone
-web/template.html       page shell: CSS, HTML structure, save system, phone/contacts UI, controller JS
-web/assets/             licensed images embedded into index.html at build time, + CREDITS.md
-tools/build.js          assembles index.html (engine + story + template + images)
+src/story.twee          THE canonical deliverable — real Twine2/SugarCube2, 141 passages,
+                        self-contained (5 images embedded as base64), importable as-is
+src/engine.js           standalone-build interpreter (a SugarCube subset — see "How it's built")
+web/template.html       standalone-build page shell: CSS, HTML structure, save system, controller JS
+web/assets/             source images for the standalone build's embed step, + CREDITS.md
+tools/build.js          assembles the standalone index.html (engine + story + template + images)
 tools/validate_links.js, coverage_check.js, test_harness.js, endings_check.js, smoke_test.js   QA scripts
-index.html              built output — the actual playable game (generated, but committed)
+index.html              standalone build output (generated, but committed) — a convenience,
+                        not the deliverable; src/story.twee is complete without it
 docs/design-doc.md      original creative brief
 CLAUDE.md               the brief this build was made against — kept as project history
 ```
