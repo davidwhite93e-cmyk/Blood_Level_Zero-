@@ -58,6 +58,8 @@ hr { border-color: #3a1418; }
 <<set $nightsPassed to 1>>
 <<set $past to "">>
 <<set $pastName to "">>
+<<set $playerName to "">>
+<<set $playerPortrait to "">>
 <<set $visitedMidtown to false>>
 <<set $visitedDocks to false>>
 <<set $visitedHollow to false>>
@@ -174,7 +176,11 @@ Something under your ribs turns over, slow and enormous, like a second heartbeat
 
 Text scrawls into being at the bottom of your vision, unbidden, uninvited, precise.
 
+<<if $playerName != "">>
+<div class="sys-pulse"><strong>[ SYSTEM ]</strong> Vessel status: <strong>ACTIVE</strong>.<br>Subject reclassified: <strong>$playerName</strong>. Sire: <strong>UNKNOWN</strong>. Coven: <strong>NONE</strong>.<br>Hunger tracking initialized.</div>
+<<else>>
 <div class="sys-pulse"><strong>[ SYSTEM ]</strong> Vessel status: <strong>ACTIVE</strong>.<br>Subject reclassified. Sire: <strong>UNKNOWN</strong>. Coven: <strong>NONE</strong>.<br>Hunger tracking initialized.</div>
+<</if>>
 
 [[You sit up.->ChoosePast]]
 
@@ -386,7 +392,7 @@ Three parts of the city keep pulling at your attention, each for a different rea
 <</if>>
 
 :: CheckStatus
-<div class="sys-pulse"><strong>[ SYSTEM — STATUS ]</strong> &nbsp;Night $nightsPassed<br>Hunger: <strong>$hunger</strong>/100 &nbsp;|&nbsp; Humanity: <strong>$humanity</strong>/100 &nbsp;|&nbsp; Notoriety: <strong>$heat</strong>/100<br>Prior life: $pastName</div>
+<div class="sys-pulse"><strong>[ SYSTEM — STATUS ]</strong> &nbsp;Night $nightsPassed<br><<if $playerName != "">>Subject: <strong>$playerName</strong><br><</if>>Hunger: <strong>$hunger</strong>/100 &nbsp;|&nbsp; Humanity: <strong>$humanity</strong>/100 &nbsp;|&nbsp; Notoriety: <strong>$heat</strong>/100<br>Prior life: $pastName</div>
 
 <<if $disciplines.length > 0>>
 ''What has surfaced in you:''

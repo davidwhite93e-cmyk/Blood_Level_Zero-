@@ -3,7 +3,7 @@
 <title>Blood Level Zero</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Cinzel+Decorative:wght@400;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --void:#0a0908;
@@ -36,6 +36,8 @@
     overflow-x:hidden;
   }
 
+  [hidden]{ display:none !important; }
+
   @keyframes grain-shift{
     0%,100%{ transform:translate(0,0); }
     20%{ transform:translate(-2%,-3%); }
@@ -62,6 +64,217 @@
     body::before{ animation:none; }
   }
 
+  /* ============ Ambient skyline (behind the in-game view too) ============ */
+  .ambient-skyline{
+    position:fixed;
+    left:0; right:0; bottom:0;
+    height:26vh;
+    min-height:140px;
+    max-height:260px;
+    z-index:0;
+    pointer-events:none;
+    background:linear-gradient(180deg, #1c1613 0%, #120f0d 45%, var(--void) 100%);
+    clip-path:polygon(0% 100%,0% 68%,4% 68%,4% 46%,9% 46%,9% 60%,14% 60%,14% 28%,16% 28%,16% 64%,22% 64%,22% 42%,27% 42%,27% 55%,33% 55%,33% 22%,36% 22%,36% 50%,42% 50%,42% 64%,48% 64%,48% 32%,52% 32%,52% 16%,55% 16%,55% 38%,60% 38%,60% 58%,66% 58%,66% 45%,70% 45%,70% 68%,76% 68%,76% 50%,80% 50%,80% 64%,86% 64%,86% 36%,90% 36%,90% 58%,95% 58%,95% 72%,100% 72%,100% 100%);
+  }
+  .ambient-skyline::after{
+    content:"";
+    position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(92,20,31,.16), transparent 60%);
+  }
+
+  /* ============ Start screen ============ */
+  .start-screen{
+    position:fixed; inset:0;
+    z-index:20;
+    overflow-y:auto;
+    background:radial-gradient(ellipse at 70% 15%, #241417 0%, var(--void) 55%);
+  }
+  .start-moon{
+    position:absolute;
+    top:7%; right:11%;
+    width:min(180px, 22vw);
+    height:min(180px, 22vw);
+    border-radius:50%;
+    background:radial-gradient(circle at 38% 34%, #f3d9c4 0%, #d99a5c 28%, var(--blood) 62%, var(--blood-deep) 100%);
+    box-shadow:0 0 70px 18px rgba(201,58,76,.28), 0 0 140px 50px rgba(92,20,31,.18);
+    opacity:.9;
+  }
+  .start-fog{
+    position:absolute;
+    left:-20%; width:140%; height:120px;
+    border-radius:50%;
+    background:radial-gradient(ellipse, rgba(200,190,180,.10), transparent 70%);
+    filter:blur(18px);
+    pointer-events:none;
+  }
+  .start-fog.f1{ bottom:14%; animation:fog-drift 46s ease-in-out infinite; }
+  .start-fog.f2{ bottom:6%; height:160px; opacity:.7; animation:fog-drift 60s ease-in-out infinite reverse; }
+  @keyframes fog-drift{
+    0%,100%{ transform:translateX(0); }
+    50%{ transform:translateX(6%); }
+  }
+  @media (prefers-reduced-motion:reduce){
+    .start-fog{ animation:none; }
+  }
+  .start-skyline{
+    position:absolute;
+    left:0; right:0; bottom:0;
+    height:32vh;
+    min-height:160px;
+    background:#050403;
+    clip-path:polygon(0% 100%,0% 65%,4% 65%,4% 40%,9% 40%,9% 55%,14% 55%,14% 20%,16% 20%,16% 60%,22% 60%,22% 35%,27% 35%,27% 50%,33% 50%,33% 15%,36% 15%,36% 45%,42% 45%,42% 60%,48% 60%,48% 25%,52% 25%,52% 8%,55% 8%,55% 30%,60% 30%,60% 55%,66% 55%,66% 40%,70% 40%,70% 65%,76% 65%,76% 45%,80% 45%,80% 60%,86% 60%,86% 30%,90% 30%,90% 55%,95% 55%,95% 70%,100% 70%,100% 100%);
+  }
+  .start-vignette{
+    position:absolute; inset:0;
+    background:radial-gradient(ellipse at 50% 40%, transparent 35%, rgba(10,9,8,.75) 100%);
+    pointer-events:none;
+  }
+
+  .start-content{
+    position:relative;
+    z-index:1;
+    max-width:640px;
+    margin:0 auto;
+    padding:9vh 24px 60px;
+    text-align:center;
+  }
+  .start-eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.68rem;
+    letter-spacing:.32em;
+    text-transform:uppercase;
+    color:var(--system);
+    opacity:.85;
+    margin:0 0 18px;
+  }
+  .start-title{
+    font-family:'Cinzel Decorative', 'Spectral', serif;
+    font-weight:700;
+    font-size:clamp(2.1rem, 8vw, 4rem);
+    line-height:1.05;
+    letter-spacing:.02em;
+    margin:0 0 6px;
+    color:#f1e6df;
+    text-shadow:
+      0 0 18px rgba(201,58,76,.55),
+      0 0 46px rgba(156,34,51,.35),
+      0 2px 0 rgba(0,0,0,.6);
+  }
+  .start-title .drip{
+    display:inline-block;
+    color:var(--blood-bright);
+  }
+  .start-tagline{
+    font-style:italic;
+    color:var(--bone-dim);
+    font-size:1rem;
+    max-width:440px;
+    margin:0 auto 40px;
+    line-height:1.7;
+  }
+
+  .creation-panel{
+    text-align:left;
+    background:rgba(20,18,16,.72);
+    border:1px solid var(--rule);
+    border-left:3px solid var(--blood);
+    padding:22px 24px 26px;
+    backdrop-filter:blur(2px);
+  }
+  .creation-panel h2{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.72rem;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--system);
+    margin:0 0 4px;
+    font-weight:500;
+  }
+  .creation-panel .field-help{
+    font-size:.82rem;
+    color:var(--muted);
+    margin:0 0 12px;
+  }
+  .name-input{
+    width:100%;
+    background:var(--void);
+    border:1px solid var(--rule);
+    border-bottom:2px solid var(--blood-deep);
+    color:var(--bone);
+    font-family:'JetBrains Mono',monospace;
+    font-size:.95rem;
+    padding:11px 12px;
+    margin-bottom:22px;
+    letter-spacing:.02em;
+  }
+  .name-input::placeholder{ color:var(--muted); }
+  .name-input:focus{ outline:none; border-color:var(--blood); border-bottom-color:var(--blood-bright); }
+
+  .portrait-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.72rem;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--system);
+    margin:0 0 10px;
+    font-weight:500;
+  }
+  .portrait-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:10px;
+    margin-bottom:26px;
+  }
+  @media (max-width:520px){
+    .portrait-grid{ grid-template-columns:repeat(2, 1fr); }
+  }
+  .portrait-card{
+    background:var(--panel);
+    border:1px solid var(--rule);
+    padding:8px 6px 10px;
+    cursor:pointer;
+    text-align:center;
+    transition:border-color .15s ease, background .15s ease, transform .15s ease;
+  }
+  .portrait-card:hover{ border-color:var(--blood-deep); background:var(--panel-2); }
+  .portrait-card:focus-visible{ outline:2px solid var(--system); outline-offset:2px; }
+  .portrait-card.selected{
+    border-color:var(--blood-bright);
+    box-shadow:0 0 0 1px var(--blood-bright), 0 0 16px rgba(201,58,76,.35);
+  }
+  .portrait-card svg{ width:100%; height:auto; display:block; margin-bottom:6px; }
+  .portrait-card .p-caption{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.6rem;
+    letter-spacing:.1em;
+    color:var(--bone-dim);
+    text-transform:uppercase;
+  }
+  .portrait-card.selected .p-caption{ color:var(--blood-bright); }
+
+  .begin-btn{
+    display:block;
+    width:100%;
+    font-family:'JetBrains Mono',monospace;
+    font-size:.92rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    text-align:center;
+    color:var(--bone);
+    background:linear-gradient(180deg, var(--panel-2), var(--panel));
+    border:1px solid var(--blood-deep);
+    padding:14px;
+    cursor:pointer;
+    transition:border-color .15s ease, background .15s ease, color .15s ease, box-shadow .15s ease;
+  }
+  .begin-btn:hover{
+    border-color:var(--blood-bright);
+    color:#fff;
+    box-shadow:0 0 22px rgba(201,58,76,.25);
+  }
+  .begin-btn:focus-visible{ outline:2px solid var(--system); outline-offset:2px; }
+
+  /* ============ Main app ============ */
   #app{
     position:relative; z-index:2;
     max-width:680px;
@@ -94,7 +307,21 @@
     letter-spacing:.14em;
     margin-left:10px;
   }
-  .mast-right{ display:flex; align-items:center; gap:8px; }
+  .mast-right{ display:flex; align-items:center; gap:10px; }
+  .identity-chip{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:.64rem;
+    letter-spacing:.06em;
+    color:var(--bone-dim);
+    text-transform:uppercase;
+    border:1px solid var(--rule);
+    padding:2px 8px 2px 2px;
+  }
+  .identity-chip .chip-badge{ width:20px; height:20px; flex:none; display:block; }
+  .identity-chip .chip-badge svg{ width:100%; height:100%; display:block; }
   .restart-link{
     font-family:'JetBrains Mono',monospace;
     font-size:.68rem;
@@ -310,11 +537,38 @@
   ::selection{ background:var(--blood-deep); color:#fff; }
 </style>
 
-<div id="app">
+<div class="ambient-skyline" aria-hidden="true"></div>
+
+<div id="startScreen" class="start-screen">
+  <div class="start-moon" aria-hidden="true"></div>
+  <div class="start-fog f1" aria-hidden="true"></div>
+  <div class="start-fog f2" aria-hidden="true"></div>
+  <div class="start-skyline" aria-hidden="true"></div>
+  <div class="start-vignette" aria-hidden="true"></div>
+  <div class="start-content">
+    <p class="start-eyebrow">System online — tracking active</p>
+    <h1 class="start-title">Blood Level Zero<span class="drip">.</span></h1>
+    <p class="start-tagline">You woke up newly Embraced, with no sire, no coven, and a hunger that won't quit. A diegetic System is already watching. Tell it who you are.</p>
+
+    <div class="creation-panel">
+      <h2>[ System ] Identity reconstruction</h2>
+      <p class="field-help">Records are fragmentary. A name is optional — the System will track you regardless.</p>
+      <input type="text" id="nameInput" class="name-input" maxlength="30" placeholder="Leave blank to stay nameless" autocomplete="off">
+
+      <p class="portrait-label">Select subject visual</p>
+      <div class="portrait-grid" id="portraitGrid" role="radiogroup" aria-label="Character portrait"></div>
+
+      <button type="button" class="begin-btn" id="beginBtn">Begin the night</button>
+    </div>
+  </div>
+</div>
+
+<div id="app" hidden>
   <div class="masthead">
     <div class="wordmark">
       <span class="title">Blood Level Zero<span class="dot">.</span><span class="night" id="nightLabel"></span></span>
       <span class="mast-right">
+        <span class="identity-chip" id="identityChip" hidden><span class="chip-badge" id="identityBadge"></span><span id="identityName"></span></span>
         <button class="restart-link" id="restartBtn" type="button">↺ begin again</button>
       </span>
     </div>
@@ -350,12 +604,63 @@ const TWEE_SOURCE = __TWEE_SOURCE_JSON__;
     { key:'vigilTier',    name:'Cold Vigil',    max:2 }
   ];
 
+  /* ---- portrait art: inline SVG "system dossier" cards, no external assets ---- */
+  function bustPath(){
+    return '<path d="M20 100 Q20 65 50 65 Q80 65 80 100 Z" fill="#1b1815"/><circle cx="50" cy="42" r="20" fill="#1b1815"/>';
+  }
+  var PORTRAITS = [
+    {
+      key: 'unmarked',
+      caption: 'Unmarked',
+      accent: 'var(--system)',
+      extra: ''
+    },
+    {
+      key: 'hooded',
+      caption: 'Hooded',
+      accent: 'var(--blood-bright)',
+      extra: '<path d="M27 47 Q27 13 50 13 Q73 13 73 47 Q73 29 50 29 Q27 29 27 47 Z" fill="var(--blood-deep)" opacity=".92"/>'
+    },
+    {
+      key: 'collared',
+      caption: 'Collared',
+      accent: 'var(--warn)',
+      extra: '<path d="M33 68 L50 86 L44 66 Z" fill="var(--warn)"/><path d="M67 68 L50 86 L56 66 Z" fill="var(--warn)"/>'
+    },
+    {
+      key: 'bound',
+      caption: 'Bound',
+      accent: 'var(--bone-dim)',
+      extra: '<rect x="30" y="35" width="40" height="3" fill="var(--bone-dim)"/><circle cx="67" cy="33" r="6" fill="var(--bone-dim)"/>'
+    }
+  ];
+
+  function portraitSvg(key, withFrame){
+    var p = PORTRAITS.filter(function(x){ return x.key === key; })[0] || PORTRAITS[0];
+    var frame = withFrame
+      ? '<rect x="1" y="1" width="98" height="98" fill="var(--panel)" stroke="var(--rule)"/><rect x="1" y="1" width="4" height="98" fill="' + p.accent + '"/>'
+      : '';
+    return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + p.caption + ' portrait">' +
+      frame + bustPath() + p.extra +
+    '</svg>';
+  }
+
   var passageEl  = document.getElementById('passage');
   var choicesEl  = document.getElementById('choices');
   var statusEl   = document.getElementById('statusStrip');
   var discEl     = document.getElementById('disciplinesRow');
   var nightEl    = document.getElementById('nightLabel');
   var restartBtn = document.getElementById('restartBtn');
+  var startScreenEl = document.getElementById('startScreen');
+  var appEl      = document.getElementById('app');
+  var nameInput  = document.getElementById('nameInput');
+  var portraitGridEl = document.getElementById('portraitGrid');
+  var beginBtn   = document.getElementById('beginBtn');
+  var identityChip = document.getElementById('identityChip');
+  var identityBadge = document.getElementById('identityBadge');
+  var identityName = document.getElementById('identityName');
+
+  var selectedPortrait = PORTRAITS[0].key;
 
   /* ---- persistence (best-effort; never let storage break the game) ---- */
   function saveGame(passageName){
@@ -391,6 +696,14 @@ const TWEE_SOURCE = __TWEE_SOURCE_JSON__;
     return html;
   }
 
+  function renderIdentity(){
+    var s = engine.state;
+    if (!s.playerPortrait && !s.playerName) { identityChip.hidden = true; return; }
+    identityChip.hidden = false;
+    identityBadge.innerHTML = portraitSvg(s.playerPortrait || PORTRAITS[0].key, false);
+    identityName.textContent = s.playerName || 'unnamed';
+  }
+
   function renderStatus(){
     var s = engine.state;
     var gauges = [
@@ -406,6 +719,7 @@ const TWEE_SOURCE = __TWEE_SOURCE_JSON__;
     }).join('');
 
     nightEl.textContent = s.nightsPassed ? ' / night ' + s.nightsPassed : '';
+    renderIdentity();
 
     var tags = POWERS.filter(function(p){ return (Number(s[p.key]) || 0) > 0; }).map(function(p){
       var tier = Number(s[p.key]) || 0;
@@ -466,7 +780,7 @@ const TWEE_SOURCE = __TWEE_SOURCE_JSON__;
       again.addEventListener('click', function(ev){
         ev.preventDefault();
         window.scrollTo({top:0, behavior:'smooth'});
-        startNew();
+        returnToStartScreen();
       });
       actions.appendChild(again);
       choicesEl.appendChild(note);
@@ -489,11 +803,56 @@ const TWEE_SOURCE = __TWEE_SOURCE_JSON__;
     choicesEl.appendChild(row);
   }
 
-  function startNew(){
+  /* ---- start screen / character creation ---- */
+  function renderPortraitGrid(){
+    portraitGridEl.innerHTML = '';
+    PORTRAITS.forEach(function(p){
+      var card = document.createElement('div');
+      card.className = 'portrait-card' + (p.key === selectedPortrait ? ' selected' : '');
+      card.setAttribute('role', 'radio');
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('aria-checked', p.key === selectedPortrait ? 'true' : 'false');
+      card.innerHTML = portraitSvg(p.key, true) + '<div class="p-caption">' + p.caption + '</div>';
+      function select(){
+        selectedPortrait = p.key;
+        renderPortraitGrid();
+      }
+      card.addEventListener('click', select);
+      card.addEventListener('keydown', function(ev){
+        if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); select(); }
+      });
+      portraitGridEl.appendChild(card);
+    });
+  }
+
+  function showStartScreen(){
+    startScreenEl.hidden = false;
+    appEl.hidden = true;
+    renderPortraitGrid();
+    nameInput.value = '';
+    window.scrollTo({top:0});
+  }
+
+  function beginNewGame(){
+    var name = (nameInput.value || '').trim().slice(0, 30);
     clearGame();
     engine = BLZCreateEngine(TWEE_SOURCE);
+    engine.state.playerName = name;
+    engine.state.playerPortrait = selectedPortrait;
+    startScreenEl.hidden = true;
+    appEl.hidden = false;
     go(engine.startPassage);
   }
+
+  function returnToStartScreen(){
+    engine = null;
+    showStartScreen();
+  }
+
+  beginBtn.addEventListener('click', beginNewGame);
+  nameInput.addEventListener('keydown', function(ev){
+    if (ev.key === 'Enter') { ev.preventDefault(); beginNewGame(); }
+  });
 
   function resumeFrom(save){
     engine = BLZCreateEngine(TWEE_SOURCE);
@@ -502,11 +861,16 @@ const TWEE_SOURCE = __TWEE_SOURCE_JSON__;
     Object.keys(save.state).forEach(function(k){
       engine.state[k] = save.state[k];
     });
+    startScreenEl.hidden = true;
+    appEl.hidden = false;
     go(save.passage);
   }
 
   function showResumePrompt(save){
+    startScreenEl.hidden = true;
+    appEl.hidden = false;
     engine = BLZCreateEngine(TWEE_SOURCE);
+    Object.keys(save.state).forEach(function(k){ engine.state[k] = save.state[k]; });
     renderStatus();
     passageEl.innerHTML =
       '<div class="resume-panel">' +
@@ -529,7 +893,7 @@ const TWEE_SOURCE = __TWEE_SOURCE_JSON__;
     fresh.href = '#';
     fresh.className = 'choice-link';
     fresh.textContent = 'Start over from the beginning.';
-    fresh.addEventListener('click', function(ev){ ev.preventDefault(); startNew(); });
+    fresh.addEventListener('click', function(ev){ ev.preventDefault(); clearGame(); returnToStartScreen(); });
 
     row.appendChild(cont);
     row.appendChild(fresh);
@@ -538,7 +902,8 @@ const TWEE_SOURCE = __TWEE_SOURCE_JSON__;
 
   restartBtn.addEventListener('click', function(){
     if (window.confirm('Begin the night again from the start? This clears your saved progress.')) {
-      startNew();
+      clearGame();
+      returnToStartScreen();
     }
   });
 
@@ -546,7 +911,7 @@ const TWEE_SOURCE = __TWEE_SOURCE_JSON__;
   if (existing) {
     showResumePrompt(existing);
   } else {
-    startNew();
+    showStartScreen();
   }
 })();
 </script>
